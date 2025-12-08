@@ -74,7 +74,7 @@ export default function OrderStatusPage() {
     if (!isHydrated || (isLoading && !order) || (!email && !error)) {
         return (
             <>
-                <Header />
+                <Header variant="light" />
                 <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-green-50 pt-32 pb-16">
                     <div className="container mx-auto px-4">
                         <div className="flex flex-col items-center justify-center py-20">
@@ -91,7 +91,7 @@ export default function OrderStatusPage() {
     if (!email) {
         return (
             <>
-                <Header />
+                <Header variant="light" />
                 <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-green-50 pt-32 pb-16">
                     <div className="container mx-auto px-4">
                         <div className="max-w-lg mx-auto text-center py-20">
@@ -116,7 +116,7 @@ export default function OrderStatusPage() {
     if (error || !order) {
         return (
             <>
-                <Header />
+                <Header variant="light" />
                 <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-green-50 pt-32 pb-16">
                     <div className="container mx-auto px-4">
                         <div className="max-w-lg mx-auto text-center py-20">
@@ -140,7 +140,7 @@ export default function OrderStatusPage() {
 
     return (
         <>
-            <Header />
+            <Header variant="light" />
 
             <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-green-50 pt-32 pb-16">
                 <div className="container mx-auto px-4">
@@ -149,14 +149,14 @@ export default function OrderStatusPage() {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="text-center mb-12"
+                            className="text-center mb-8 sm:mb-12"
                         >
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-6">
-                                <span className="text-sm text-gray-500">ID Comandă:</span>
-                                <code className="text-sm font-mono text-christmas-red">{orderId}</code>
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-full shadow-sm mb-4 sm:mb-6">
+                                <span className="text-xs sm:text-sm text-gray-500">ID Comandă:</span>
+                                <code className="text-xs sm:text-sm font-mono text-christmas-red truncate max-w-[120px] sm:max-w-none">{orderId}</code>
                             </div>
 
-                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 font-christmas">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 font-christmas px-2">
                                 {isCompleted ? (
                                     <>Videoclipul Tău Este Gata! 🎄</>
                                 ) : isFailed ? (
@@ -186,9 +186,41 @@ export default function OrderStatusPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="bg-white rounded-3xl shadow-xl p-8 mb-8"
+                                className="bg-white rounded-3xl shadow-xl p-4 sm:p-8 mb-8"
                             >
-                                <div className="relative">
+                                {/* Mobile: Vertical steps */}
+                                <div className="block sm:hidden space-y-4">
+                                    {statusSteps.map((step, index) => {
+                                        const isActive = index === currentStepIndex;
+                                        const isComplete = index < currentStepIndex;
+
+                                        return (
+                                            <div key={step.status} className="flex items-center gap-4">
+                                                <div
+                                                    className={`
+                                                        w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0
+                                                        ${isComplete
+                                                            ? 'bg-christmas-green text-white'
+                                                            : isActive
+                                                                ? 'bg-christmas-red text-white shadow-lg'
+                                                                : 'bg-gray-100 text-gray-400'
+                                                        }
+                                                    `}
+                                                >
+                                                    {isComplete ? <CheckCircle className="w-5 h-5" /> : step.icon}
+                                                </div>
+                                                <p className={`text-sm font-medium
+                                                    ${isActive ? 'text-christmas-red' : isComplete ? 'text-christmas-green' : 'text-gray-400'}
+                                                `}>
+                                                    {step.label}
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Desktop: Horizontal steps */}
+                                <div className="hidden sm:block relative">
                                     {/* Progress bar */}
                                     <div className="absolute top-6 left-6 right-6 h-1 bg-gray-100 rounded-full">
                                         <motion.div
@@ -211,20 +243,20 @@ export default function OrderStatusPage() {
                                                         animate={isActive ? { scale: [1, 1.1, 1] } : {}}
                                                         transition={{ duration: 1, repeat: isActive ? Infinity : 0 }}
                                                         className={`
-                              w-12 h-12 rounded-full flex items-center justify-center text-xl
-                              ${isComplete
+                                                            w-12 h-12 rounded-full flex items-center justify-center text-xl
+                                                            ${isComplete
                                                                 ? 'bg-christmas-green text-white'
                                                                 : isActive
                                                                     ? 'bg-christmas-red text-white shadow-lg'
                                                                     : 'bg-gray-100 text-gray-400'
                                                             }
-                            `}
+                                                        `}
                                                     >
                                                         {isComplete ? <CheckCircle className="w-6 h-6" /> : step.icon}
                                                     </motion.div>
                                                     <p className={`mt-2 text-xs font-medium text-center max-w-[80px]
-                            ${isActive ? 'text-christmas-red' : isComplete ? 'text-christmas-green' : 'text-gray-400'}
-                          `}>
+                                                        ${isActive ? 'text-christmas-red' : isComplete ? 'text-christmas-green' : 'text-gray-400'}
+                                                    `}>
                                                         {step.label}
                                                     </p>
                                                 </div>
@@ -287,31 +319,31 @@ export default function OrderStatusPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="bg-white rounded-2xl shadow-lg p-6"
+                            className="bg-white rounded-2xl shadow-lg p-4 sm:p-6"
                         >
-                            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 🎁 Detalii Comandă
                             </h2>
 
-                            <div className="grid sm:grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <p className="text-gray-500">Numele Copilului</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                                <div className="p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-gray-500 text-xs sm:text-sm">Numele Copilului</p>
                                     <p className="font-semibold text-gray-900">{order.childDetails.name}</p>
                                 </div>
-                                <div>
-                                    <p className="text-gray-500">Vârsta</p>
+                                <div className="p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-gray-500 text-xs sm:text-sm">Vârsta</p>
                                     <p className="font-semibold text-gray-900">{order.childDetails.age} ani</p>
                                 </div>
-                                <div>
-                                    <p className="text-gray-500">Email</p>
-                                    <p className="font-semibold text-gray-900">{order.email}</p>
+                                <div className="p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-gray-500 text-xs sm:text-sm">Email</p>
+                                    <p className="font-semibold text-gray-900 break-all">{order.email}</p>
                                 </div>
-                                <div>
-                                    <p className="text-gray-500">Creat la</p>
+                                <div className="p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-gray-500 text-xs sm:text-sm">Creat la</p>
                                     <p className="font-semibold text-gray-900">
                                         {new Date(order.createdAt).toLocaleDateString('ro-RO', {
                                             year: 'numeric',
-                                            month: 'long',
+                                            month: 'short',
                                             day: 'numeric',
                                             hour: '2-digit',
                                             minute: '2-digit',

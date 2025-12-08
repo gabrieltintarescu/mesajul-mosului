@@ -7,7 +7,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-export function Header() {
+interface HeaderProps {
+    /** Use 'light' variant on pages with light backgrounds to ensure text visibility */
+    variant?: 'default' | 'light';
+}
+
+export function Header({ variant = 'default' }: HeaderProps) {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -20,6 +25,9 @@ export function Header() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // On light variant pages, always use dark text (like scrolled state)
+    const useDarkText = variant === 'light' || isScrolled;
+
     const navLinks = [
         { href: '/#how-it-works', label: 'Instrucțiuni' },
         { href: '/#testimonials', label: 'Recenzii' },
@@ -30,7 +38,7 @@ export function Header() {
         <header
             className={`
         fixed top-0 left-0 right-0 z-50 transition-all duration-300
-        ${isScrolled
+        ${isScrolled || variant === 'light'
                     ? 'bg-white/95 backdrop-blur-md shadow-lg py-3'
                     : 'bg-transparent py-5'
                 }
@@ -54,10 +62,10 @@ export function Header() {
                         </motion.div>
                         <span className={`
               font-bold text-xl transition-colors duration-300 font-christmas
-              ${isScrolled ? 'text-christmas-red' : 'text-white'}
+              ${useDarkText ? 'text-christmas-red' : 'text-white'}
               group-hover:text-christmas-gold
             `}>
-                            Mesaj de la <span className="text-christmas-gold">Mosu'</span>
+                            Mesaj de la <span className="text-christmas-gold">Mosu&apos;</span>
                         </span>
                     </Link>
 
@@ -69,7 +77,7 @@ export function Header() {
                                 href={link.href}
                                 className={`
                   font-medium transition-colors duration-300
-                  ${isScrolled
+                  ${useDarkText
                                         ? 'text-gray-700 hover:text-christmas-red'
                                         : 'text-white/90 hover:text-white'
                                     }
@@ -98,7 +106,7 @@ export function Header() {
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         className={`
               md:hidden p-2 rounded-lg transition-colors
-              ${isScrolled
+              ${useDarkText
                                 ? 'text-gray-700 hover:bg-gray-100'
                                 : 'text-white hover:bg-white/10'
                             }

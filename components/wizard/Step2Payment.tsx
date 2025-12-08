@@ -328,7 +328,7 @@ export function Step2Payment() {
                                     <div className="flex items-center gap-2 text-green-700">
                                         <Tag className="w-5 h-5" />
                                         <span className="font-medium">{couponCode}</span>
-                                        <span className="text-sm">(-{discountAmountLei} Lei)</span>
+                                        <span className="text-sm">(-{couponDiscountLei} Lei)</span>
                                     </div>
                                     <button
                                         type="button"
