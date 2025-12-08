@@ -362,7 +362,8 @@ export default function Home() {
             </p>
           </MotionFadeIn>
 
-          <div className="max-w-5xl mx-auto">
+          {/* Desktop: Grid Cards */}
+          <div className="hidden md:block max-w-5xl mx-auto">
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {howItWorks.map((item, index) => (
                 <MotionFadeIn key={item.step} delay={index * 0.1}>
@@ -393,6 +394,37 @@ export default function Home() {
               ))}
             </div>
           </div>
+
+          {/* Mobile: Compact List */}
+          <MotionFadeIn className="md:hidden max-w-2xl mx-auto">
+            <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+              <ul className="space-y-6">
+                {howItWorks.map((item, index) => (
+                  <motion.li
+                    key={item.step}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-start gap-4"
+                  >
+                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-christmas-red to-red-600 flex items-center justify-center text-2xl shadow-lg">
+                      {item.icon}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-bold text-christmas-red bg-christmas-gold/10 px-2 py-0.5 rounded-full">
+                          Pasul {item.step}
+                        </span>
+                        <h3 className="font-bold text-lg text-gray-900">{item.title}</h3>
+                      </div>
+                      <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
+                    </div>
+                  </motion.li>
+                ))}
+              </ul>
+            </div>
+          </MotionFadeIn>
 
           {/* CTA */}
           <MotionFadeIn className="text-center mt-16">
