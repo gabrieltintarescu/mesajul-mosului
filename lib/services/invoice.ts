@@ -1,13 +1,11 @@
 import { InvoicingDetails, OrderRow } from '@/lib/supabase/database.types';
+import { jsPDF } from 'jspdf';
 
 /**
- * Generate an invoice PDF as a base64 string
- * Uses html-pdf-node for server-side PDF generation
+ * Generate an invoice PDF as a Buffer
+ * Uses jsPDF for server-side PDF generation (no browser required)
  */
 export async function generateInvoicePdf(order: OrderRow): Promise<Buffer> {
-    // Dynamic import for server-side only
-    const htmlPdf = await import('html-pdf-node');
-
     const invoicing = order.invoicing_details as InvoicingDetails | null;
     const invoiceNumber = `INV-${order.id.slice(0, 8).toUpperCase()}`;
     const invoiceDate = new Date().toLocaleDateString('ro-RO', {
@@ -24,269 +22,279 @@ export async function generateInvoicePdf(order: OrderRow): Promise<Buffer> {
 
     const formatPrice = (bani: number) => `${(bani / 100).toFixed(2)} RON`;
 
-    // Build customer info based on invoice type
-    let customerInfo = '';
+    // Create PDF document
+    const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let y = margin;
+
+    // Colors
+    const primaryColor: [number, number, number] = [196, 30, 58]; // Christmas red
+    const greenColor: [number, number, number] = [26, 71, 42]; // Christmas green
+    const grayColor: [number, number, number] = [102, 102, 102];
+    const lightGray: [number, number, number] = [153, 153, 153];
+
+    // ===== HEADER =====
+    // Logo/Company name
+    doc.setFontSize(20);
+    doc.setTextColor(...primaryColor);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Mesaj de la Mosu', margin, y);
+
+    y += 6;
+    doc.setFontSize(10);
+    doc.setTextColor(...grayColor);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Videoclipuri personalizate de la Mos Craciun', margin, y);
+
+    // Invoice title (right side)
+    doc.setFontSize(24);
+    doc.setTextColor(...primaryColor);
+    doc.setFont('helvetica', 'bold');
+    doc.text('FACTURA', pageWidth - margin, margin, { align: 'right' });
+
+    doc.setFontSize(11);
+    doc.setTextColor(...grayColor);
+    doc.setFont('helvetica', 'normal');
+    doc.text(invoiceNumber, pageWidth - margin, margin + 8, { align: 'right' });
+    doc.text(`Data: ${invoiceDate}`, pageWidth - margin, margin + 14, { align: 'right' });
+
+    // Header line
+    y += 10;
+    doc.setDrawColor(...primaryColor);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+
+    // ===== PARTIES SECTION =====
+    y += 15;
+
+    // Supplier info (left)
+    doc.setFontSize(9);
+    doc.setTextColor(...lightGray);
+    doc.setFont('helvetica', 'normal');
+    doc.text('FURNIZOR', margin, y);
+
+    y += 6;
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SC Mesaj de la Mosu SRL', margin, y);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    y += 5;
+    doc.text('CUI: RO12345678', margin, y);
+    y += 5;
+    doc.text('Reg. Com.: J40/1234/2024', margin, y);
+    y += 5;
+    doc.text('Str. Polul Nord nr. 1', margin, y);
+    y += 5;
+    doc.text('Bucuresti, Romania', margin, y);
+    y += 5;
+    doc.text('contact@mesajdelamosu.ro', margin, y);
+
+    // Customer info (right)
+    const customerX = pageWidth / 2 + 10;
+    let customerY = y - 31; // Go back up
+
+    doc.setFontSize(9);
+    doc.setTextColor(...lightGray);
+    doc.text('CLIENT', customerX, customerY);
+
+    customerY += 6;
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'bold');
+
     if (invoicing) {
         if (invoicing.invoiceType === 'business') {
-            customerInfo = `
-                <p><strong>${invoicing.companyName || ''}</strong></p>
-                <p>Persoană de contact: ${invoicing.name}</p>
-                <p>CUI: ${invoicing.cui || 'N/A'}</p>
-                ${invoicing.regCom ? `<p>Reg. Com.: ${invoicing.regCom}</p>` : ''}
-                <p>${invoicing.address}</p>
-                <p>${invoicing.city}, ${invoicing.county} ${invoicing.postalCode}</p>
-                <p>Tel: ${invoicing.phone}</p>
-            `;
+            doc.text(invoicing.companyName || '', customerX, customerY);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            customerY += 5;
+            doc.text(`Persoana de contact: ${invoicing.name}`, customerX, customerY);
+            customerY += 5;
+            doc.text(`CUI: ${invoicing.cui || 'N/A'}`, customerX, customerY);
+            if (invoicing.regCom) {
+                customerY += 5;
+                doc.text(`Reg. Com.: ${invoicing.regCom}`, customerX, customerY);
+            }
         } else {
-            customerInfo = `
-                <p><strong>${invoicing.name}</strong></p>
-                <p>CNP: ${invoicing.cnp || 'N/A'}</p>
-                <p>${invoicing.address}</p>
-                <p>${invoicing.city}, ${invoicing.county} ${invoicing.postalCode}</p>
-                <p>Tel: ${invoicing.phone}</p>
-            `;
+            doc.text(invoicing.name, customerX, customerY);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            customerY += 5;
+            doc.text(`CNP: ${invoicing.cnp || 'N/A'}`, customerX, customerY);
         }
+        customerY += 5;
+        doc.text(invoicing.address, customerX, customerY);
+        customerY += 5;
+        doc.text(`${invoicing.city}, ${invoicing.county} ${invoicing.postalCode}`, customerX, customerY);
+        customerY += 5;
+        doc.text(`Tel: ${invoicing.phone}`, customerX, customerY);
     } else {
-        customerInfo = `<p><strong>${order.email}</strong></p>`;
+        doc.text(order.email, customerX, customerY);
+    }
+    customerY += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Email: ${order.email}`, customerX, customerY);
+
+    // ===== TABLE SECTION =====
+    y += 20;
+
+    // Table header
+    const colWidths = [85, 25, 30, 30]; // Descriere, Cantitate, Pret unitar, Total
+    const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+
+    doc.setFillColor(...primaryColor);
+    doc.rect(margin, y, tableWidth, 10, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+
+    let colX = margin + 3;
+    doc.text('DESCRIERE', colX, y + 7);
+    colX += colWidths[0];
+    doc.text('CANT.', colX, y + 7);
+    colX += colWidths[1];
+    doc.text('PRET UNITAR', colX, y + 7);
+    colX += colWidths[2];
+    doc.text('TOTAL', colX, y + 7);
+
+    y += 10;
+
+    // Table rows
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+
+    // Row 1: Product
+    y += 8;
+    colX = margin + 3;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Videoclip personalizat de la Mos Craciun', colX, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...grayColor);
+    doc.text(`Pentru: ${order.child_details.name}`, colX, y + 5);
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+
+    colX += colWidths[0];
+    doc.text('1', colX + 5, y);
+    colX += colWidths[1];
+    doc.text(formatPrice(basePrice), colX, y);
+    colX += colWidths[2];
+    doc.text(formatPrice(basePrice), colX, y);
+
+    // Row separator
+    y += 12;
+    doc.setDrawColor(238, 238, 238);
+    doc.line(margin, y, margin + tableWidth, y);
+
+    // Row 2: Holiday discount
+    y += 8;
+    colX = margin + 3;
+    doc.setTextColor(...greenColor);
+    doc.text('Reducere de Sarbatori', colX, y);
+    doc.setTextColor(0, 0, 0);
+    colX += colWidths[0];
+    doc.text('1', colX + 5, y);
+    colX += colWidths[1];
+    doc.text(`-${formatPrice(holidayDiscount)}`, colX, y);
+    colX += colWidths[2];
+    doc.text(`-${formatPrice(holidayDiscount)}`, colX, y);
+
+    y += 6;
+    doc.setDrawColor(238, 238, 238);
+    doc.line(margin, y, margin + tableWidth, y);
+
+    // Row 3: Coupon discount (if any)
+    if (couponDiscount > 0) {
+        y += 8;
+        colX = margin + 3;
+        doc.setTextColor(...greenColor);
+        doc.text(`Cod promotional: ${order.coupon_code}`, colX, y);
+        doc.setTextColor(0, 0, 0);
+        colX += colWidths[0];
+        doc.text('1', colX + 5, y);
+        colX += colWidths[1];
+        doc.text(`-${formatPrice(couponDiscount)}`, colX, y);
+        colX += colWidths[2];
+        doc.text(`-${formatPrice(couponDiscount)}`, colX, y);
+
+        y += 6;
+        doc.setDrawColor(238, 238, 238);
+        doc.line(margin, y, margin + tableWidth, y);
     }
 
-    const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 12px;
-            line-height: 1.5;
-            color: #333;
-            padding: 40px;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 40px;
-            border-bottom: 3px solid #c41e3a;
-            padding-bottom: 20px;
-        }
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #c41e3a;
-        }
-        .logo-subtitle {
-            font-size: 12px;
-            color: #666;
-        }
-        .invoice-info {
-            text-align: right;
-        }
-        .invoice-title {
-            font-size: 28px;
-            color: #c41e3a;
-            margin-bottom: 5px;
-        }
-        .invoice-number {
-            font-size: 14px;
-            color: #666;
-        }
-        .parties {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 40px;
-        }
-        .party {
-            width: 45%;
-        }
-        .party-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #999;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-        .party p {
-            margin: 3px 0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-        th {
-            background: #c41e3a;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-size: 11px;
-            text-transform: uppercase;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        .text-right {
-            text-align: right;
-        }
-        .totals {
-            width: 300px;
-            margin-left: auto;
-        }
-        .totals-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .totals-row.total {
-            font-size: 16px;
-            font-weight: bold;
-            color: #c41e3a;
-            border-bottom: none;
-            border-top: 2px solid #c41e3a;
-            padding-top: 15px;
-        }
-        .footer {
-            margin-top: 60px;
-            text-align: center;
-            color: #999;
-            font-size: 10px;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-        }
-        .thank-you {
-            text-align: center;
-            margin: 40px 0;
-            padding: 20px;
-            background: #f8f8f8;
-            border-radius: 8px;
-        }
-        .thank-you p {
-            font-size: 14px;
-            color: #1a472a;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div>
-            <div class="logo">🎅 Mesaj de la Moșu</div>
-            <div class="logo-subtitle">Videoclipuri personalizate de la Moș Crăciun</div>
-        </div>
-        <div class="invoice-info">
-            <div class="invoice-title">FACTURĂ</div>
-            <div class="invoice-number">${invoiceNumber}</div>
-            <div class="invoice-number">Data: ${invoiceDate}</div>
-        </div>
-    </div>
+    // ===== TOTALS SECTION =====
+    y += 15;
+    const totalsX = pageWidth - margin - 80;
 
-    <div class="parties">
-        <div class="party">
-            <div class="party-title">Furnizor</div>
-            <p><strong>SC Mesaj de la Moșu SRL</strong></p>
-            <p>CUI: RO12345678</p>
-            <p>Reg. Com.: J40/1234/2024</p>
-            <p>Str. Polul Nord nr. 1</p>
-            <p>București, România</p>
-            <p>contact@mesajdelamosu.ro</p>
-        </div>
-        <div class="party">
-            <div class="party-title">Client</div>
-            ${customerInfo}
-            <p>Email: ${order.email}</p>
-        </div>
-    </div>
+    // Subtotal
+    doc.setFontSize(10);
+    doc.text('Subtotal:', totalsX, y);
+    doc.text(formatPrice(basePrice), pageWidth - margin, y, { align: 'right' });
 
-    <table>
-        <thead>
-            <tr>
-                <th>Descriere</th>
-                <th class="text-right">Cantitate</th>
-                <th class="text-right">Preț unitar</th>
-                <th class="text-right">Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>
-                    <strong>Videoclip personalizat de la Moș Crăciun</strong><br>
-                    <span style="color: #666; font-size: 11px;">
-                        Pentru: ${order.child_details.name}
-                    </span>
-                </td>
-                <td class="text-right">1</td>
-                <td class="text-right">${formatPrice(basePrice)}</td>
-                <td class="text-right">${formatPrice(basePrice)}</td>
-            </tr>
-            <tr>
-                <td>
-                    <span style="color: #1a472a;">Reducere de Sărbători</span>
-                </td>
-                <td class="text-right">1</td>
-                <td class="text-right">-${formatPrice(holidayDiscount)}</td>
-                <td class="text-right">-${formatPrice(holidayDiscount)}</td>
-            </tr>
-            ${couponDiscount > 0 ? `
-            <tr>
-                <td>
-                    <span style="color: #1a472a;">Cod promoțional: ${order.coupon_code}</span>
-                </td>
-                <td class="text-right">1</td>
-                <td class="text-right">-${formatPrice(couponDiscount)}</td>
-                <td class="text-right">-${formatPrice(couponDiscount)}</td>
-            </tr>
-            ` : ''}
-        </tbody>
-    </table>
+    y += 6;
+    doc.text('Reduceri:', totalsX, y);
+    doc.text(`-${formatPrice(holidayDiscount + couponDiscount)}`, pageWidth - margin, y, { align: 'right' });
 
-    <div class="totals">
-        <div class="totals-row">
-            <span>Subtotal:</span>
-            <span>${formatPrice(basePrice)}</span>
-        </div>
-        <div class="totals-row">
-            <span>Reduceri:</span>
-            <span>-${formatPrice(holidayDiscount + couponDiscount)}</span>
-        </div>
-        <div class="totals-row">
-            <span>TVA (inclus):</span>
-            <span>${formatPrice(Math.round(finalPrice * 0.19 / 1.19))}</span>
-        </div>
-        <div class="totals-row total">
-            <span>TOTAL:</span>
-            <span>${formatPrice(finalPrice)}</span>
-        </div>
-    </div>
+    y += 6;
+    const vat = Math.round(finalPrice * 0.19 / 1.19);
+    doc.text('TVA (inclus):', totalsX, y);
+    doc.text(formatPrice(vat), pageWidth - margin, y, { align: 'right' });
 
-    <div class="thank-you">
-        <p>🎄 Mulțumim pentru comandă! 🎄</p>
-        <p style="font-size: 12px; color: #666; margin-top: 10px;">
-            Videoclipul tău personalizat este în curs de realizare.
-        </p>
-    </div>
+    // Total line
+    y += 3;
+    doc.setDrawColor(...primaryColor);
+    doc.setLineWidth(0.5);
+    doc.line(totalsX, y, pageWidth - margin, y);
 
-    <div class="footer">
-        <p>Această factură a fost generată electronic și este valabilă fără semnătură.</p>
-        <p>ID Comandă: ${order.id}</p>
-        <p>© ${new Date().getFullYear()} Mesaj de la Moșu - Toate drepturile rezervate</p>
-    </div>
-</body>
-</html>
-    `;
+    y += 8;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(...primaryColor);
+    doc.text('TOTAL:', totalsX, y);
+    doc.text(formatPrice(finalPrice), pageWidth - margin, y, { align: 'right' });
 
-    const options = {
-        format: 'A4' as const,
-        printBackground: true,
-    };
+    // ===== THANK YOU BOX =====
+    y += 20;
+    doc.setFillColor(248, 248, 248);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, 25, 3, 3, 'F');
 
-    const file = { content: html };
-    const pdfBuffer = await htmlPdf.generatePdf(file, options);
+    doc.setTextColor(...greenColor);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text('Multumim pentru comanda!', pageWidth / 2, y + 10, { align: 'center' });
 
-    return pdfBuffer;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...grayColor);
+    doc.text('Videoclipul tau personalizat este in curs de realizare.', pageWidth / 2, y + 18, { align: 'center' });
+
+    // ===== FOOTER =====
+    y += 40;
+    doc.setDrawColor(238, 238, 238);
+    doc.line(margin, y, pageWidth - margin, y);
+
+    y += 8;
+    doc.setFontSize(8);
+    doc.setTextColor(...lightGray);
+    doc.text('Aceasta factura a fost generata electronic si este valabila fara semnatura.', pageWidth / 2, y, { align: 'center' });
+    y += 4;
+    doc.text(`ID Comanda: ${order.id}`, pageWidth / 2, y, { align: 'center' });
+    y += 4;
+    doc.text(`© ${new Date().getFullYear()} Mesaj de la Mosu - Toate drepturile rezervate`, pageWidth / 2, y, { align: 'center' });
+
+    // Convert to Buffer
+    const pdfArrayBuffer = doc.output('arraybuffer');
+    return Buffer.from(pdfArrayBuffer);
 }
