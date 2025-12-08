@@ -1,4 +1,4 @@
-import { sendVideoReadyEmail } from '@/lib/services/email';
+import { sendAbandonedCartEmail, sendVideoReadyEmail } from '@/lib/services/email';
 import { createHeyGenVideo, getHeyGenVideoStatus } from '@/lib/services/heygen';
 import { generateSantaScript } from '@/lib/services/openai';
 import { processVideoWithAssets } from '@/lib/services/video';
@@ -236,5 +236,66 @@ export const videoGenerationJob = inngest.createFunction(
     }
 );
 
+/**
+ * Abandoned cart reminder - sends email if order is unpaid after 30 minutes
+ */
+export const abandonedCartReminder = inngest.createFunction(
+    {
+        id: 'abandoned-cart-reminder',
+        name: 'Abandoned Cart Reminder',
+        cancelOn: [
+            {
+                // Cancel this function if payment is received
+                event: 'order/payment.completed',
+                match: 'data.orderId',
+            },
+        ],
+    },
+    { event: 'order/created' },
+    async ({ event, step }) => {
+        const { orderId } = event.data;
+
+        // Wait 30 minutes before checking
+        await step.sleep('wait-30-minutes', '30m');
+
+        // Check if order is still unpaid
+        const order = await step.run('check-order-status', async () => {
+            const { data, error } = await supabaseAdmin
+                .from('orders')
+                .select('*')
+                .eq('id', orderId)
+                .single();
+
+            if (error || !data) {
+                return null;
+            }
+
+            return data;
+        });
+
+        // If order doesn't exist or is already paid/processing, skip
+        if (!order || order.status !== 'pending_payment') {
+            return { skipped: true, reason: 'Order not in pending_payment status' };
+        }
+
+        // Send abandoned cart email
+        await step.run('send-reminder-email', async () => {
+            await sendAbandonedCartEmail({
+                to: order.email,
+                childName: order.child_details.name,
+                orderId: order.id,
+            });
+
+            Sentry.addBreadcrumb({
+                category: 'email',
+                message: `Abandoned cart email sent to ${order.email}`,
+                level: 'info',
+            });
+        });
+
+        return { success: true, emailSent: true };
+    }
+);
+
 // Export all functions for the Inngest handler
-export const functions = [videoGenerationJob];
+export const functions = [videoGenerationJob, abandonedCartReminder];

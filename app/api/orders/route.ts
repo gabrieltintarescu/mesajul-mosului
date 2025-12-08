@@ -1,3 +1,4 @@
+import { inngest } from '@/lib/inngest';
 import { isValidEmail, rateLimit } from '@/lib/security';
 import { ChildDetails, InvoicingDetails } from '@/lib/supabase/database.types';
 import { supabaseAdmin } from '@/lib/supabase/server';
@@ -130,6 +131,12 @@ export async function POST(request: Request) {
             message: `Order created: ${order.id}`,
             level: 'info',
             data: { email: body.email, finalPrice },
+        });
+
+        // Trigger abandoned cart reminder (will be cancelled if payment completes)
+        await inngest.send({
+            name: 'order/created',
+            data: { orderId: order.id },
         });
 
         return NextResponse.json({

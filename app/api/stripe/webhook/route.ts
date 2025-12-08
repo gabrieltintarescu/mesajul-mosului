@@ -164,6 +164,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         data: { orderId },
     });
 
+    // Cancel the abandoned cart reminder by sending the payment completed event
+    await inngest.send({
+        name: 'order/payment.completed',
+        data: { orderId },
+    });
+
     Sentry.addBreadcrumb({
         category: 'order',
         message: `Order ${orderId} payment completed, video generation triggered`,
