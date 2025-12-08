@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         }
 
         // Get base price
-        const basePrice = parseInt(process.env.VIDEO_PRICE_CENTS || '2999', 10);
+        const basePrice = parseInt(process.env.VIDEO_PRICE_CENTS || '8900', 10);
         let discountAmount = 0;
         let finalPrice = basePrice;
         let validCouponCode: string | null = null;

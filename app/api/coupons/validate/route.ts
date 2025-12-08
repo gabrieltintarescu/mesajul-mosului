@@ -51,7 +51,7 @@ export async function POST(request: Request) {
         }
 
         // Calculate discount
-        const basePrice = parseInt(process.env.VIDEO_PRICE_CENTS || '2999', 10);
+        const basePrice = parseInt(process.env.VIDEO_PRICE_CENTS || '8900', 10);
         let discountAmount = 0;
 
         if (coupon.discount_percent > 0) {

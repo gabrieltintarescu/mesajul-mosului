@@ -32,7 +32,7 @@ export const stripe = {
 };
 
 export function getBasePrice(): number {
-    return parseInt(process.env.VIDEO_PRICE_CENTS || '2999', 10);
+    return parseInt(process.env.VIDEO_PRICE_CENTS || '8900', 10);
 }
 
 export function calculateFinalPrice(
