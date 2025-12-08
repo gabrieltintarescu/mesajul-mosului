@@ -1,0 +1,240 @@
+import { sendVideoReadyEmail } from '@/lib/services/email';
+import { createHeyGenVideo, getHeyGenVideoStatus } from '@/lib/services/heygen';
+import { generateSantaScript } from '@/lib/services/openai';
+import { processVideoWithAssets } from '@/lib/services/video';
+import { supabaseAdmin } from '@/lib/supabase/server';
+import * as Sentry from '@sentry/nextjs';
+import { inngest } from './client';
+
+// Define the event type
+type VideoGenerationEvent = {
+    name: 'video/generate.requested';
+    data: {
+        orderId: string;
+    };
+};
+
+/**
+ * Background job for video generation pipeline
+ * 
+ * This function handles the entire video generation process:
+ * 1. Generate script with ChatGPT
+ * 2. Create video with HeyGen
+ * 3. Wait for HeyGen completion (with polling)
+ * 4. Download intro, main video, outro
+ * 5. Concatenate with FFmpeg
+ * 6. Upload final video to Supabase
+ * 7. Send email notification
+ */
+export const videoGenerationJob = inngest.createFunction(
+    {
+        id: 'video-generation',
+        name: 'Video Generation Pipeline',
+        retries: 2,
+        onFailure: async ({ error, event }) => {
+            // The original event data is nested in the failure event
+            const orderId = (event.data as { event?: { data?: { orderId?: string } } }).event?.data?.orderId;
+
+            // Report failure to Sentry with full context
+            Sentry.withScope((scope) => {
+                scope.setTag('job', 'video-generation');
+                if (orderId) {
+                    scope.setTag('orderId', orderId);
+                }
+                scope.setContext('event', event);
+                Sentry.captureException(error);
+            });
+
+            // Update order status to failed
+            if (orderId) {
+                await supabaseAdmin
+                    .from('orders')
+                    .update({
+                        status: 'failed',
+                        error_message: error instanceof Error ? error.message : 'Unknown error',
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', orderId);
+            }
+        },
+    },
+    { event: 'video/generate.requested' },
+    async ({ event, step }) => {
+        const { orderId } = event.data;
+
+        // Set Sentry context for all errors in this job
+        Sentry.setTag('orderId', orderId);
+        Sentry.setContext('order', { orderId });
+
+        // Step 1: Get order details
+        const order = await step.run('fetch-order', async () => {
+            const { data, error } = await supabaseAdmin
+                .from('orders')
+                .select('*')
+                .eq('id', orderId)
+                .single();
+
+            if (error || !data) {
+                throw new Error(`Order not found: ${orderId}`);
+            }
+
+            // Add order details to Sentry context
+            Sentry.setContext('orderDetails', {
+                email: data.email,
+                childName: data.child_details?.name,
+                status: data.status,
+            });
+
+            return data;
+        });
+
+        // Step 2: Generate script with ChatGPT
+        const script = await step.run('generate-script', async () => {
+            await supabaseAdmin
+                .from('orders')
+                .update({ status: 'generating_script', updated_at: new Date().toISOString() })
+                .eq('id', orderId);
+
+            const generatedScript = await generateSantaScript(order.child_details);
+
+            await supabaseAdmin
+                .from('orders')
+                .update({ script: generatedScript })
+                .eq('id', orderId);
+
+            return generatedScript;
+        });
+
+        // Step 3: Create HeyGen video task
+        const heygenVideoId = await step.run('create-heygen-video', async () => {
+            Sentry.addBreadcrumb({
+                category: 'video',
+                message: 'Starting HeyGen video creation',
+                level: 'info',
+            });
+
+            await supabaseAdmin
+                .from('orders')
+                .update({ status: 'generating_video', updated_at: new Date().toISOString() })
+                .eq('id', orderId);
+
+            const videoId = await createHeyGenVideo(script);
+
+            await supabaseAdmin
+                .from('orders')
+                .update({ heygen_video_id: videoId })
+                .eq('id', orderId);
+
+            Sentry.setContext('heygen', { videoId });
+
+            return videoId;
+        });
+
+        // Step 4: Poll for HeyGen completion (using step.sleep for efficient waiting)
+        const heygenVideoUrl = await step.run('wait-for-heygen', async () => {
+            const maxAttempts = 60; // 10 minutes with 10 second intervals
+
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                const status = await getHeyGenVideoStatus(heygenVideoId);
+
+                Sentry.addBreadcrumb({
+                    category: 'video',
+                    message: `HeyGen status check ${attempt + 1}/${maxAttempts}: ${status.status}`,
+                    level: 'info',
+                });
+
+                if (status.status === 'completed' && status.videoUrl) {
+                    return status.videoUrl;
+                }
+
+                if (status.status === 'failed') {
+                    const error = new Error(`HeyGen video generation failed: ${status.error || 'Unknown error'}`);
+                    Sentry.captureException(error, {
+                        extra: { heygenVideoId, attempt, status },
+                    });
+                    throw error;
+                }
+
+                // Wait 10 seconds before next check
+                await new Promise(resolve => setTimeout(resolve, 10000));
+            }
+
+            const error = new Error('HeyGen video generation timed out');
+            Sentry.captureException(error, {
+                extra: { heygenVideoId, maxAttempts },
+            });
+            throw error;
+        });
+
+        // Step 5: Process video with intro/outro concatenation
+        const finalVideoUrl = await step.run('process-video', async () => {
+            Sentry.addBreadcrumb({
+                category: 'video',
+                message: 'Starting video processing with intro/outro',
+                level: 'info',
+            });
+
+            await supabaseAdmin
+                .from('orders')
+                .update({ status: 'merging', updated_at: new Date().toISOString() })
+                .eq('id', orderId);
+
+            // Process video with optional intro/outro (uses Shotstack if configured)
+            const publicUrl = await processVideoWithAssets(heygenVideoUrl, orderId);
+
+            Sentry.addBreadcrumb({
+                category: 'video',
+                message: 'Video processing completed',
+                level: 'info',
+                data: { publicUrl },
+            });
+
+            return publicUrl;
+        });
+
+        // Step 6: Mark as completed
+        await step.run('complete-order', async () => {
+            await supabaseAdmin
+                .from('orders')
+                .update({
+                    status: 'completed',
+                    video_url: finalVideoUrl,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('id', orderId);
+
+            Sentry.addBreadcrumb({
+                category: 'order',
+                message: 'Order marked as completed',
+                level: 'info',
+            });
+        });
+
+        // Step 7: Send email notification
+        await step.run('send-email', async () => {
+            Sentry.addBreadcrumb({
+                category: 'email',
+                message: `Sending email to ${order.email}`,
+                level: 'info',
+            });
+
+            await sendVideoReadyEmail({
+                to: order.email,
+                childName: order.child_details.name,
+                videoUrl: finalVideoUrl,
+                orderId: orderId,
+            });
+
+            Sentry.addBreadcrumb({
+                category: 'email',
+                message: 'Email sent successfully',
+                level: 'info',
+            });
+        });
+
+        return { success: true, videoUrl: finalVideoUrl };
+    }
+);
+
+// Export all functions for the Inngest handler
+export const functions = [videoGenerationJob];
