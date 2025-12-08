@@ -12,7 +12,6 @@ import React, { useState } from 'react';
 interface FormErrors {
     invoiceType?: string;
     name?: string;
-    cnp?: string;
     companyName?: string;
     cui?: string;
     address?: string;
@@ -38,11 +37,7 @@ export function Step2Invoicing() {
             newErrors.name = 'Te rugăm să introduci numele';
         }
 
-        if (invoiceType === 'individual') {
-            if (!invoicingDetails.cnp?.trim() || invoicingDetails.cnp.length !== 13) {
-                newErrors.cnp = 'Te rugăm să introduci un CNP valid (13 cifre)';
-            }
-        } else {
+        if (invoiceType === 'business') {
             if (!invoicingDetails.companyName?.trim()) {
                 newErrors.companyName = 'Te rugăm să introduci numele companiei';
             }
@@ -193,15 +188,6 @@ export function Step2Invoicing() {
                                     className="pl-12"
                                 />
                             </div>
-
-                            <InputField
-                                label="CNP"
-                                placeholder="Codul Numeric Personal (13 cifre)"
-                                value={invoicingDetails.cnp || ''}
-                                onChange={(e) => setInvoicingDetails({ cnp: e.target.value.replace(/\D/g, '').slice(0, 13) })}
-                                error={errors.cnp}
-                                required
-                            />
                         </>
                     ) : (
                         <>
@@ -229,23 +215,14 @@ export function Step2Invoicing() {
                                 required
                             />
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <InputField
-                                    label="CUI"
-                                    placeholder="Codul Unic de Înregistrare"
-                                    value={invoicingDetails.cui || ''}
-                                    onChange={(e) => setInvoicingDetails({ cui: e.target.value })}
-                                    error={errors.cui}
-                                    required
-                                />
-
-                                <InputField
-                                    label="Nr. Reg. Comerțului"
-                                    placeholder="J00/000/0000"
-                                    value={invoicingDetails.regCom || ''}
-                                    onChange={(e) => setInvoicingDetails({ regCom: e.target.value })}
-                                />
-                            </div>
+                            <InputField
+                                label="CUI"
+                                placeholder="Codul Unic de Înregistrare"
+                                value={invoicingDetails.cui || ''}
+                                onChange={(e) => setInvoicingDetails({ cui: e.target.value })}
+                                error={errors.cui}
+                                required
+                            />
                         </>
                     )}
 
@@ -277,8 +254,8 @@ export function Step2Invoicing() {
                                 />
 
                                 <InputField
-                                    label="Județ"
-                                    placeholder="Județul"
+                                    label="Județ/Sector"
+                                    placeholder="Județul/Sectorul"
                                     value={invoicingDetails.county || ''}
                                     onChange={(e) => setInvoicingDetails({ county: e.target.value })}
                                     error={errors.county}
