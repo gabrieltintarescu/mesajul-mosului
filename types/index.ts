@@ -41,12 +41,17 @@ export interface InvoicingDetails {
 export interface Order {
     id: string;
     childDetails: ChildDetails;
+    invoicingDetails?: InvoicingDetails;
     status: OrderStatus;
     videoUrl?: string;
     createdAt: string;
     updatedAt: string;
     email: string;
     paymentIntentId?: string;
+    // Pricing fields
+    final_price: number;
+    discount_amount?: number;
+    coupon_code?: string | null;
 }
 
 // API Response Types

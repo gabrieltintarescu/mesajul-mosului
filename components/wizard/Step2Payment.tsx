@@ -1,28 +1,78 @@
 'use client';
 
 import { CTAButton } from '@/components/ui';
-import { createCheckoutSession, validateCoupon } from '@/lib/api';
+import { applyCouponToOrder, createCheckoutSession, getOrderStatus, removeCouponFromOrder } from '@/lib/api';
 import { useWizardStore } from '@/store';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check, CreditCard, Lock, Shield, Tag } from 'lucide-react';
+import { ArrowLeft, Check, CheckCircle, CreditCard, Lock, Shield, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+interface OrderPricing {
+    finalPriceCents: number;
+    discountAmountCents: number;
+    couponCode: string | null;
+}
 
 export function Step2Payment() {
     const router = useRouter();
-    const { orderId, childDetails } = useWizardStore();
+    const { orderId, childDetails, email, orderFinalPriceCents } = useWizardStore();
     const [isProcessing, setIsProcessing] = useState(false);
     const [paymentError, setPaymentError] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [orderPricing, setOrderPricing] = useState<OrderPricing | null>(null);
+    const [isAlreadyPaid, setIsAlreadyPaid] = useState(false);
+
+    // Coupon state
     const [discountCode, setDiscountCode] = useState('');
-    const [discountApplied, setDiscountApplied] = useState<{ code: string; amount: number } | null>(null);
     const [discountError, setDiscountError] = useState('');
     const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
 
-    const basePrice = 129;
-    const holidayDiscount = 40;
-    const discountAmount = discountApplied?.amount || 0;
-    const totalPrice = basePrice - holidayDiscount - discountAmount;
+    // Fetch order details to get actual price
+    useEffect(() => {
+        async function fetchOrderDetails() {
+            if (!orderId || !email) {
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const response = await getOrderStatus(orderId, email);
+                if (response.success && response.data?.order) {
+                    const order = response.data.order;
+
+                    // Check if order is already paid
+                    if (order.status !== 'pending_payment') {
+                        setIsAlreadyPaid(true);
+                        // Redirect to order page after a moment
+                        setTimeout(() => {
+                            router.push(`/order/${orderId}?email=${encodeURIComponent(email)}`);
+                        }, 2000);
+                    }
+
+                    setOrderPricing({
+                        finalPriceCents: order.final_price,
+                        discountAmountCents: order.discount_amount || 0,
+                        couponCode: order.coupon_code ?? null,
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching order:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchOrderDetails();
+    }, [orderId, email, router]);
+
+    // Calculate display price - use order's actual price or stored price
+    const finalPriceCents = orderPricing?.finalPriceCents ?? orderFinalPriceCents ?? 8900;
+    const totalPriceLei = finalPriceCents / 100;
+    const discountAmountLei = (orderPricing?.discountAmountCents ?? 0) / 100;
+    const basePriceLei = totalPriceLei + discountAmountLei;
+    const couponCode = orderPricing?.couponCode;
 
     const handleApplyDiscount = async () => {
         if (!discountCode.trim()) {
@@ -30,34 +80,54 @@ export function Step2Payment() {
             return;
         }
 
+        if (!orderId) {
+            setDiscountError('Comandă invalidă');
+            return;
+        }
+
         setIsApplyingDiscount(true);
         setDiscountError('');
 
         try {
-            const response = await validateCoupon(discountCode);
+            const response = await applyCouponToOrder(orderId, discountCode);
 
             if (response.success && response.data) {
-                // Convert cents to Lei for display
-                const discountInLei = Math.round(response.data.discountAmount / 100);
-                setDiscountApplied({ code: response.data.code, amount: discountInLei });
+                // Update local pricing state
+                setOrderPricing({
+                    finalPriceCents: response.data.finalPrice,
+                    discountAmountCents: response.data.discountAmount,
+                    couponCode: response.data.code,
+                });
                 setDiscountError('');
             } else {
                 setDiscountError(response.error || 'Codul de reducere nu este valid');
-                setDiscountApplied(null);
             }
         } catch (error) {
-            console.error('Error validating coupon:', error);
+            console.error('Error applying coupon:', error);
             setDiscountError('Eroare la validarea codului');
-            setDiscountApplied(null);
         }
 
         setIsApplyingDiscount(false);
     };
 
-    const handleRemoveDiscount = () => {
-        setDiscountApplied(null);
+    const handleRemoveDiscount = async () => {
+        if (!orderId) return;
+
+        setIsApplyingDiscount(true);
+        try {
+            const response = await removeCouponFromOrder(orderId);
+            if (response.success && response.data) {
+                setOrderPricing({
+                    finalPriceCents: response.data.finalPrice,
+                    discountAmountCents: 0,
+                    couponCode: null,
+                });
+            }
+        } catch (error) {
+            console.error('Error removing coupon:', error);
+        }
         setDiscountCode('');
-        setDiscountError('');
+        setIsApplyingDiscount(false);
     };
 
     const handlePayment = async () => {
@@ -77,7 +147,15 @@ export function Step2Payment() {
                 // Redirect to Stripe Checkout
                 window.location.href = checkoutResponse.data.url;
             } else {
-                setPaymentError(checkoutResponse.error || 'Eroare la crearea sesiunii de plată');
+                // Check if it's an already paid error
+                if (checkoutResponse.error === 'Order has already been paid') {
+                    setIsAlreadyPaid(true);
+                    setTimeout(() => {
+                        router.push(`/order/${orderId}?email=${encodeURIComponent(email)}`);
+                    }, 2000);
+                } else {
+                    setPaymentError(checkoutResponse.error || 'Eroare la crearea sesiunii de plată');
+                }
                 setIsProcessing(false);
             }
         } catch (error) {
@@ -94,6 +172,40 @@ export function Step2Payment() {
         'Vizionări nelimitate',
         'Poți distribui familiei',
     ];
+
+    // Show loading state
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-500 border-t-transparent mx-auto mb-4"></div>
+                    <p className="text-gray-600">Se încarcă detaliile comenzii...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Show already paid message
+    if (isAlreadyPaid) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="max-w-md mx-auto text-center"
+            >
+                <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                    <CheckCircle className="w-16 h-16 text-christmas-green mx-auto mb-4" />
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2 font-christmas">
+                        Comandă Deja Plătită!
+                    </h2>
+                    <p className="text-gray-600 mb-4">
+                        Această comandă a fost deja achitată. Te redirecționăm către pagina comenzii...
+                    </p>
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-christmas-red border-t-transparent mx-auto"></div>
+                </div>
+            </motion.div>
+        );
+    }
 
     return (
         <motion.div
@@ -117,20 +229,16 @@ export function Step2Payment() {
 
                             <div className="border-t border-gray-100 pt-4">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Pachet Video</span>
-                                    <span className="font-semibold">{basePrice} Lei</span>
+                                    <span className="text-gray-600">Pachet Video HD</span>
+                                    <span className="font-semibold">{totalPriceLei + discountAmountLei} Lei</span>
                                 </div>
-                                <div className="flex justify-between items-center text-sm text-christmas-green mt-1">
-                                    <span>Reducere de Sărbători</span>
-                                    <span>-{holidayDiscount} Lei</span>
-                                </div>
-                                {discountApplied && (
+                                {discountAmountLei > 0 && (
                                     <div className="flex justify-between items-center text-sm text-christmas-green mt-1">
                                         <span className="flex items-center gap-1">
                                             <Tag className="w-3 h-3" />
-                                            Cod: {discountApplied.code}
+                                            {couponCode ? `Cod: ${couponCode}` : 'Reducere'}
                                         </span>
-                                        <span>-{discountApplied.amount} Lei</span>
+                                        <span>-{discountAmountLei} Lei</span>
                                     </div>
                                 )}
                             </div>
@@ -138,7 +246,7 @@ export function Step2Payment() {
                             <div className="border-t border-gray-100 pt-4">
                                 <div className="flex justify-between items-center">
                                     <span className="font-bold text-gray-900">Total</span>
-                                    <span className="text-2xl font-bold text-christmas-red">{totalPrice} Lei</span>
+                                    <span className="text-2xl font-bold text-christmas-red">{totalPriceLei} Lei</span>
                                 </div>
                             </div>
                         </div>
@@ -206,19 +314,20 @@ export function Step2Payment() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Cod de Reducere
                             </label>
-                            {discountApplied ? (
+                            {couponCode ? (
                                 <div className="flex items-center justify-between p-4 bg-green-50 rounded-xl border border-green-200">
-                                    <div className="flex items-center gap-2 text-christmas-green">
+                                    <div className="flex items-center gap-2 text-green-700">
                                         <Tag className="w-5 h-5" />
-                                        <span className="font-medium">{discountApplied.code}</span>
-                                        <span className="text-sm">(-{discountApplied.amount} Lei)</span>
+                                        <span className="font-medium">{couponCode}</span>
+                                        <span className="text-sm">(-{discountAmountLei} Lei)</span>
                                     </div>
                                     <button
                                         type="button"
                                         onClick={handleRemoveDiscount}
-                                        className="text-sm text-gray-500 hover:text-christmas-red transition-colors"
+                                        disabled={isApplyingDiscount}
+                                        className="text-sm text-gray-500 hover:text-red-600 transition-colors disabled:opacity-50"
                                     >
-                                        Elimină
+                                        {isApplyingDiscount ? '...' : 'Elimină'}
                                     </button>
                                 </div>
                             ) : (
@@ -259,7 +368,7 @@ export function Step2Payment() {
                             isLoading={isProcessing}
                             icon={<Lock className="w-5 h-5" />}
                         >
-                            Plătește {totalPrice} Lei Securizat
+                            Plătește {totalPriceLei} Lei Securizat
                         </CTAButton>
 
                         {/* Back Link */}

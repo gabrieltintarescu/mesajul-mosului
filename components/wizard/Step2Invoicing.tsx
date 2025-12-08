@@ -24,7 +24,7 @@ interface FormErrors {
 
 export function Step2Invoicing() {
     const router = useRouter();
-    const { invoicingDetails, setInvoicingDetails, childDetails, email, setOrderId } = useWizardStore();
+    const { invoicingDetails, setInvoicingDetails, childDetails, email, setOrderId, setOrderFinalPriceCents } = useWizardStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
     const [submitError, setSubmitError] = useState<string | null>(null);
@@ -112,6 +112,7 @@ export function Step2Invoicing() {
 
             if (response.success && response.data) {
                 setOrderId(response.data.orderId);
+                setOrderFinalPriceCents(response.data.finalPrice);
                 router.push('/wizard/step3');
             } else {
                 setSubmitError(response.error || 'A apărut o eroare. Te rugăm să încerci din nou.');

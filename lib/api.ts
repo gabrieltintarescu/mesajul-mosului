@@ -7,12 +7,50 @@ import {
     OrderStatus,
 } from '@/types';
 
+export interface PricingInfo {
+    basePriceCents: number;
+    holidayDiscountCents: number;
+    finalPriceCents: number;
+    basePriceLei: number;
+    holidayDiscountLei: number;
+    finalPriceLei: number;
+    currency: string;
+}
+
+/**
+ * Get current pricing information
+ */
+export async function getPricing(): Promise<ApiResponse<PricingInfo>> {
+    try {
+        const response = await fetch('/api/pricing');
+        const result = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                error: result.error || 'Failed to get pricing',
+            };
+        }
+
+        return {
+            success: true,
+            data: result.data,
+        };
+    } catch (error) {
+        console.error('Error getting pricing:', error);
+        return {
+            success: false,
+            error: 'Network error. Please try again.',
+        };
+    }
+}
+
 /**
  * Initiate a new order with child details
  * Creates an order in Supabase and returns the orderId
  */
 export async function initiateOrder(
-    payload: InitiateOrderPayload
+    payload: InitiateOrderPayload & { couponCode?: string }
 ): Promise<ApiResponse<{ orderId: string; finalPrice: number; discountAmount: number }>> {
     try {
         const response = await fetch('/api/orders', {
@@ -24,6 +62,7 @@ export async function initiateOrder(
                 email: payload.email,
                 childDetails: payload.childDetails,
                 invoicingDetails: payload.invoicingDetails,
+                couponCode: payload.couponCode,
             }),
         });
 
@@ -86,6 +125,81 @@ export async function validateCoupon(
         };
     } catch (error) {
         console.error('Error validating coupon:', error);
+        return {
+            success: false,
+            error: 'Network error. Please try again.',
+        };
+    }
+}
+
+/**
+ * Apply a coupon code to an existing order
+ */
+export async function applyCouponToOrder(
+    orderId: string,
+    couponCode: string
+): Promise<ApiResponse<{
+    code: string;
+    discountAmount: number;
+    finalPrice: number;
+}>> {
+    try {
+        const response = await fetch(`/api/orders/${orderId}/apply-coupon`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ couponCode }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                error: result.error || 'Invalid coupon code',
+            };
+        }
+
+        return {
+            success: true,
+            data: result.data,
+        };
+    } catch (error) {
+        console.error('Error applying coupon:', error);
+        return {
+            success: false,
+            error: 'Network error. Please try again.',
+        };
+    }
+}
+
+/**
+ * Remove a coupon from an existing order
+ */
+export async function removeCouponFromOrder(
+    orderId: string
+): Promise<ApiResponse<{ finalPrice: number }>> {
+    try {
+        const response = await fetch(`/api/orders/${orderId}/apply-coupon`, {
+            method: 'DELETE',
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                error: result.error || 'Failed to remove coupon',
+            };
+        }
+
+        return {
+            success: true,
+            data: result.data,
+        };
+    } catch (error) {
+        console.error('Error removing coupon:', error);
         return {
             success: false,
             error: 'Network error. Please try again.',
