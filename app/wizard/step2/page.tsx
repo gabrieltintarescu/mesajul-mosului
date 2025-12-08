@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 
 export default function WizardStep2Page() {
     const router = useRouter();
-    const { orderId, childDetails } = useWizardStore();
+    const { childDetails, email } = useWizardStore();
     const [isHydrated, setIsHydrated] = useState(false);
 
     // Wait for Zustand to hydrate from localStorage
@@ -19,11 +19,11 @@ export default function WizardStep2Page() {
         // Only check after hydration is complete
         if (!isHydrated) return;
 
-        // Redirect to step 1 if no order has been initiated
-        if (!orderId || !childDetails.name) {
+        // Redirect to step 1 if child details are not filled
+        if (!childDetails.name || !email) {
             router.push('/wizard/step1');
         }
-    }, [isHydrated, orderId, childDetails, router]);
+    }, [isHydrated, childDetails, email, router]);
 
     // Show loading while hydrating
     if (!isHydrated) {
@@ -40,7 +40,7 @@ export default function WizardStep2Page() {
     }
 
     // Don't render content if redirecting
-    if (!orderId || !childDetails.name) {
+    if (!childDetails.name || !email) {
         return null;
     }
 

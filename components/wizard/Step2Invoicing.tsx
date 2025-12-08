@@ -1,6 +1,7 @@
 'use client';
 
 import { CTAButton, InputField } from '@/components/ui';
+import { initiateOrder } from '@/lib/api';
 import { useWizardStore } from '@/store';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Building2, FileText, User } from 'lucide-react';
@@ -23,9 +24,10 @@ interface FormErrors {
 
 export function Step2Invoicing() {
     const router = useRouter();
-    const { invoicingDetails, setInvoicingDetails } = useWizardStore();
+    const { invoicingDetails, setInvoicingDetails, childDetails, email, setOrderId } = useWizardStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const invoiceType = invoicingDetails.invoiceType || 'individual';
 
@@ -79,10 +81,44 @@ export function Step2Invoicing() {
         if (!validateForm()) return;
 
         setIsSubmitting(true);
+        setSubmitError(null);
 
         try {
-            // Navigate to payment step
-            router.push('/wizard/step3');
+            // Create order with all details (child details + invoicing)
+            const response = await initiateOrder({
+                childDetails: {
+                    name: childDetails.name!,
+                    age: childDetails.age!,
+                    gender: childDetails.gender!,
+                    achievements: childDetails.achievements!,
+                    favoriteThings: childDetails.favoriteThings!,
+                    behavior: childDetails.behavior || 'nice',
+                },
+                email,
+                invoicingDetails: {
+                    invoiceType: invoicingDetails.invoiceType || 'individual',
+                    name: invoicingDetails.name!,
+                    cnp: invoicingDetails.cnp,
+                    companyName: invoicingDetails.companyName,
+                    cui: invoicingDetails.cui,
+                    regCom: invoicingDetails.regCom,
+                    address: invoicingDetails.address!,
+                    city: invoicingDetails.city!,
+                    county: invoicingDetails.county!,
+                    postalCode: invoicingDetails.postalCode!,
+                    phone: invoicingDetails.phone!,
+                },
+            });
+
+            if (response.success && response.data) {
+                setOrderId(response.data.orderId);
+                router.push('/wizard/step3');
+            } else {
+                setSubmitError(response.error || 'A apărut o eroare. Te rugăm să încerci din nou.');
+            }
+        } catch (error) {
+            console.error('Error creating order:', error);
+            setSubmitError('A apărut o eroare. Te rugăm să încerci din nou.');
         } finally {
             setIsSubmitting(false);
         }
@@ -119,8 +155,8 @@ export function Step2Invoicing() {
                             type="button"
                             onClick={() => setInvoicingDetails({ invoiceType: 'individual' })}
                             className={`p-4 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-2 ${invoiceType === 'individual'
-                                    ? 'border-christmas-red bg-red-50 text-christmas-red'
-                                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                ? 'border-christmas-red bg-red-50 text-christmas-red'
+                                : 'border-gray-200 hover:border-gray-300 text-gray-600'
                                 }`}
                         >
                             <User className="w-6 h-6" />
@@ -130,8 +166,8 @@ export function Step2Invoicing() {
                             type="button"
                             onClick={() => setInvoicingDetails({ invoiceType: 'business' })}
                             className={`p-4 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-2 ${invoiceType === 'business'
-                                    ? 'border-christmas-red bg-red-50 text-christmas-red'
-                                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                ? 'border-christmas-red bg-red-50 text-christmas-red'
+                                : 'border-gray-200 hover:border-gray-300 text-gray-600'
                                 }`}
                         >
                             <Building2 className="w-6 h-6" />
@@ -270,6 +306,13 @@ export function Step2Invoicing() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Error Message */}
+                    {submitError && (
+                        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                            {submitError}
+                        </div>
+                    )}
 
                     {/* Submit Button */}
                     <div className="pt-4">

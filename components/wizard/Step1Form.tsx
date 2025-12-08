@@ -1,7 +1,6 @@
 'use client';
 
 import { CTAButton, InputField, SelectField, TextAreaField } from '@/components/ui';
-import { initiateOrder } from '@/lib/api';
 import { useWizardStore } from '@/store';
 import { motion } from 'framer-motion';
 import { ArrowRight, Heart, Smile, Star, User } from 'lucide-react';
@@ -19,8 +18,7 @@ interface FormErrors {
 
 export function Step1Form() {
     const router = useRouter();
-    const { childDetails, email, setChildDetails, setEmail, setOrderId } = useWizardStore();
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { childDetails, email, setChildDetails, setEmail } = useWizardStore();
     const [errors, setErrors] = useState<FormErrors>({});
 
     const validateForm = (): boolean => {
@@ -59,30 +57,9 @@ export function Step1Form() {
 
         if (!validateForm()) return;
 
-        setIsSubmitting(true);
-
-        try {
-            const response = await initiateOrder({
-                childDetails: {
-                    name: childDetails.name!,
-                    age: childDetails.age!,
-                    gender: childDetails.gender!,
-                    achievements: childDetails.achievements!,
-                    favoriteThings: childDetails.favoriteThings!,
-                    behavior: childDetails.behavior || 'nice',
-                },
-                email,
-            });
-
-            if (response.success && response.data) {
-                setOrderId(response.data.orderId);
-                router.push('/wizard/step2');
-            }
-        } catch (error) {
-            console.error('Error initiating order:', error);
-        } finally {
-            setIsSubmitting(false);
-        }
+        // Store is already updated via onChange handlers
+        // Navigate to step 2 for invoicing details
+        router.push('/wizard/step2');
     };
 
     return (
@@ -212,10 +189,9 @@ export function Step1Form() {
                             type="submit"
                             size="lg"
                             className="w-full"
-                            isLoading={isSubmitting}
                             icon={<ArrowRight className="w-5 h-5" />}
                         >
-                            Continuă la Plată
+                            Continuă la Facturare
                         </CTAButton>
                     </div>
 
