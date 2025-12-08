@@ -40,9 +40,6 @@ Before starting, you'll need accounts for:
 - [Resend](https://resend.com) - Transactional emails
 - [Sentry](https://sentry.io) - Error monitoring (already configured)
 
-**Optional:**
-- [Shotstack](https://shotstack.io) - Video concatenation (for intro/outro)
-
 ---
 
 ## 🚀 Step-by-Step Setup Guide
@@ -225,9 +222,6 @@ EMAIL_FROM=Moș Crăciun <mos@yourdomain.com>
 INNGEST_EVENT_KEY=...
 INNGEST_SIGNING_KEY=signkey-...
 
-# Shotstack (optional - for intro/outro videos)
-SHOTSTACK_API_KEY=your_key
-
 # App
 NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
 
@@ -254,26 +248,34 @@ cp .env.example .env.local
 
 ---
 
-## 🎬 Video Assets (Optional)
+## 🎬 Intro/Outro Videos (Using HeyGen Templates)
 
-If you want intro/outro videos concatenated with the main Santa message:
+To add intro and outro to your Santa videos, use **HeyGen Templates** instead of post-processing:
 
-1. **Upload to Supabase Storage:**
-   - Create folder `assets/` in your `videos` bucket
-   - Upload `intro.mp4` and `outro.mp4`
+### Setting Up a HeyGen Template
 
-2. **Add to video_assets table:**
-   ```sql
-   INSERT INTO video_assets (type, storage_path, is_active) VALUES
-   ('intro', 'assets/intro.mp4', true),
-   ('outro', 'assets/outro.mp4', true);
+1. **Go to HeyGen Dashboard** → Templates → Create Template
+
+2. **Add 3 Scenes:**
+   | Scene | Content |
+   |-------|--------|
+   | Scene 1 | Your intro video/animation (5-10 seconds) |
+   | Scene 2 | Santa avatar with text variable `{{script}}` |
+   | Scene 3 | Your outro video/animation (5-10 seconds) |
+
+3. **Configure Scene 2:**
+   - Add your Santa avatar
+   - Select Romanian voice
+   - In the script field, type: `{{script}}`
+
+4. **Save and copy the Template ID**
+
+5. **Add to environment:**
+   ```bash
+   HEYGEN_TEMPLATE_ID=your_template_id
    ```
 
-3. **Set up Shotstack** (required for video concatenation):
-   - Get API key from [shotstack.io](https://shotstack.io)
-   - Add `SHOTSTACK_API_KEY` to environment variables
-
-Without Shotstack, the system will skip concatenation and deliver just the HeyGen video.
+When `HEYGEN_TEMPLATE_ID` is set, the system automatically uses the template (with intro/outro) instead of direct avatar generation.
 
 ---
 
@@ -382,8 +384,7 @@ npx inngest-cli@latest dev
 | HeyGen | ~$1.00 (depends on plan) |
 | Resend | ~$0.001 |
 | Supabase | ~$0.001 |
-| Shotstack | ~$0.05 (if used) |
-| **Total** | **~$1.10 per video** |
+| **Total** | **~$1.05 per video** |
 
 Set your `VIDEO_PRICE_CENTS` to ensure healthy margins!
 

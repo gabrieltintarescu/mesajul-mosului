@@ -8,6 +8,13 @@ interface HeyGenVideoResponse {
     message: string;
 }
 
+interface HeyGenTemplateVideoResponse {
+    error: string | null;
+    data: {
+        video_id: string;
+    };
+}
+
 interface HeyGenVideoStatusResponse {
     code: number;
     data: {
@@ -40,9 +47,64 @@ async function heygenFetch<T>(endpoint: string, options: RequestInit = {}): Prom
 }
 
 /**
- * Create a video generation task with HeyGen
+ * Create a video using a HeyGen template (recommended for intro/outro)
+ * Template should have a variable called "script" for the Santa message
+ * 
+ * To set up your template:
+ * 1. Go to HeyGen Dashboard → Templates → Create Template
+ * 2. Add Scene 1: Your intro video/animation
+ * 3. Add Scene 2: Santa avatar with text variable {{script}}
+ * 4. Add Scene 3: Your outro video/animation
+ * 5. Save and copy the Template ID to HEYGEN_TEMPLATE_ID env var
+ */
+export async function createHeyGenVideoFromTemplate(script: string): Promise<string> {
+    const templateId = process.env.HEYGEN_TEMPLATE_ID;
+
+    if (!templateId) {
+        throw new Error('HEYGEN_TEMPLATE_ID must be configured for template-based generation');
+    }
+
+    const payload = {
+        template_id: templateId,
+        title: `Santa Video - ${new Date().toISOString()}`,
+        variables: {
+            // The script variable - must match the variable name in your template
+            script: {
+                name: 'script',
+                type: 'text',
+                properties: {
+                    content: script,
+                },
+            },
+        },
+    };
+
+    const response = await heygenFetch<HeyGenTemplateVideoResponse>('/v2/template/generate', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    });
+
+    if (response.error) {
+        throw new Error(`HeyGen template video creation failed: ${response.error}`);
+    }
+
+    return response.data.video_id;
+}
+
+/**
+ * Create a video generation task with HeyGen (direct avatar, no template)
+ * Use this if you don't need intro/outro
  */
 export async function createHeyGenVideo(script: string): Promise<string> {
+    // If template ID is configured, use template-based generation (includes intro/outro)
+    if (process.env.HEYGEN_TEMPLATE_ID) {
+        console.log('Using HeyGen template for video generation (includes intro/outro)');
+        return createHeyGenVideoFromTemplate(script);
+    }
+
+    // Otherwise, use direct avatar generation (no intro/outro)
+    console.log('Using direct HeyGen avatar generation (no intro/outro)');
+
     const avatarId = process.env.HEYGEN_AVATAR_ID;
     const voiceId = process.env.HEYGEN_VOICE_ID;
 

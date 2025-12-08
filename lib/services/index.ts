@@ -1,9 +1,10 @@
 export { sendOrderConfirmationEmail, sendVideoReadyEmail } from './email';
-export { createHeyGenVideo, getHeyGenVideoStatus, waitForHeyGenVideo } from './heygen';
+export { createHeyGenVideo, createHeyGenVideoFromTemplate, getHeyGenVideoStatus, waitForHeyGenVideo } from './heygen';
 export { generateSantaScript } from './openai';
 export {
-    concatenateVideos,
-    concatenateVideosWithShotstack, downloadVideo, getVideoAssets, processVideo,
-    processVideoWithAssets, uploadToSupabase
+    downloadVideo,
+    processVideo,
+    processVideoWithAssets,
+    uploadToSupabase
 } from './video';
 
