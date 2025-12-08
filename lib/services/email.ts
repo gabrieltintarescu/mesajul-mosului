@@ -245,3 +245,125 @@ export async function sendPaymentLinkEmail({
 
 // Keep the old function as an alias for backwards compatibility
 export const sendAbandonedCartEmail = sendPaymentLinkEmail;
+
+interface SendPaymentConfirmationEmailParams {
+    to: string;
+    childName: string;
+    orderId: string;
+    invoicePdf?: Buffer;
+}
+
+/**
+ * Send payment confirmation email in Romanian with invoice PDF attached
+ * Sent after successful payment to confirm order and that video is being created
+ */
+export async function sendPaymentConfirmationEmail({
+    to,
+    childName,
+    orderId,
+    invoicePdf,
+}: SendPaymentConfirmationEmailParams): Promise<void> {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const orderUrl = `${appUrl}/order/${orderId}?email=${encodeURIComponent(to)}`;
+    const invoiceNumber = `INV-${orderId.slice(0, 8).toUpperCase()}`;
+
+    const attachments = invoicePdf
+        ? [
+            {
+                filename: `Factura-${invoiceNumber}.pdf`,
+                content: invoicePdf,
+            },
+        ]
+        : undefined;
+
+    await getResend().emails.send({
+        from: process.env.EMAIL_FROM || 'Moș Crăciun <mos@yourdomain.com>',
+        to,
+        subject: `🎅 Plata confirmată - Videoclipul pentru ${childName} este în lucru!`,
+        attachments,
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #1a472a; font-family: 'Georgia', serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <tr>
+            <td style="background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); padding: 40px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 28px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                    🎄 Plată Confirmată! 🎄
+                </h1>
+                <p style="color: #ffd700; margin-top: 10px; font-size: 18px;">
+                    Mulțumim pentru comanda ta!
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 40px; text-align: center;">
+                <div style="background: #e8f5e9; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 40px;">✓</span>
+                </div>
+                <h2 style="color: #1a472a; margin: 0 0 20px 0; font-size: 24px;">
+                    Plata a fost procesată cu succes! 🎁
+                </h2>
+                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                    Dragă părinte,
+                </p>
+                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                    Mulțumim pentru comandă! Spiridușii lui Moș Crăciun au început deja să lucreze la 
+                    videoclipul personalizat pentru <strong>${childName}</strong>.
+                </p>
+                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+                    Vei primi un email când videoclipul este gata. De obicei durează doar câteva minute!
+                </p>
+                
+                <div style="background: #f5f5f5; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                    <p style="color: #666; font-size: 14px; margin: 0 0 10px 0;">Statusul comenzii tale:</p>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="background: #c41e3a; color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px;">
+                            🎬 În lucru
+                        </span>
+                    </div>
+                </div>
+
+                <a href="${orderUrl}" 
+                   style="display: inline-block; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); 
+                          color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 30px; 
+                          font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(196, 30, 58, 0.4);
+                          margin-top: 20px;">
+                    📋 Vezi Statusul Comenzii
+                </a>
+
+                ${invoicePdf ? `
+                <hr style="border: none; border-top: 1px solid #eeeeee; margin: 30px 0;">
+                <p style="color: #666666; font-size: 14px;">
+                    📄 Factura ta (${invoiceNumber}) este atașată la acest email.
+                </p>
+                ` : ''}
+                
+                <hr style="border: none; border-top: 1px solid #eeeeee; margin: 30px 0;">
+                <p style="color: #999999; font-size: 12px;">
+                    ID Comandă: ${orderId}<br>
+                    Dacă ai întrebări, răspunde la acest email și te vom ajuta.
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="background-color: #1a472a; padding: 30px; text-align: center;">
+                <p style="color: #ffffff; margin: 0; font-size: 14px;">
+                    ❄️ Crăciun Fericit! ❄️
+                </p>
+                <p style="color: #ffd700; margin: 10px 0 0 0; font-size: 12px;">
+                    Cu drag, Moș Crăciun și Spiridușii
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+        `,
+    });
+}
+

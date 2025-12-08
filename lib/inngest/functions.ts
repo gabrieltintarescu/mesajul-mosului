@@ -1,5 +1,6 @@
-import { sendPaymentLinkEmail, sendVideoReadyEmail } from '@/lib/services/email';
+import { sendPaymentConfirmationEmail, sendPaymentLinkEmail, sendVideoReadyEmail } from '@/lib/services/email';
 import { createHeyGenVideo, getHeyGenVideoStatus } from '@/lib/services/heygen';
+import { generateInvoicePdf } from '@/lib/services/invoice';
 import { generateSantaScript } from '@/lib/services/openai';
 import { processVideoWithAssets } from '@/lib/services/video';
 import { supabaseAdmin } from '@/lib/supabase/server';
@@ -288,5 +289,73 @@ export const paymentLinkEmail = inngest.createFunction(
     }
 );
 
+/**
+ * Payment completed handler - sends confirmation email with invoice PDF
+ * Triggered when payment is successfully processed
+ */
+export const paymentCompletedEmail = inngest.createFunction(
+    {
+        id: 'payment-completed-email',
+        name: 'Payment Completed Email with Invoice',
+    },
+    { event: 'order/payment.completed' },
+    async ({ event, step }) => {
+        const { orderId } = event.data;
+
+        // Get order details
+        const order = await step.run('fetch-order', async () => {
+            const { data, error } = await supabaseAdmin
+                .from('orders')
+                .select('*')
+                .eq('id', orderId)
+                .single();
+
+            if (error || !data) {
+                return null;
+            }
+
+            return data;
+        });
+
+        // If order doesn't exist, skip
+        if (!order) {
+            return { skipped: true, reason: 'Order not found' };
+        }
+
+        // Generate invoice PDF and send email in the same step
+        // (Buffer cannot be serialized between steps)
+        const result = await step.run('generate-invoice-and-send-email', async () => {
+            let invoicePdf: Buffer | undefined;
+
+            try {
+                invoicePdf = await generateInvoicePdf(order);
+            } catch (error) {
+                Sentry.captureException(error, {
+                    extra: { orderId, context: 'Failed to generate invoice PDF' },
+                });
+                console.error('Failed to generate invoice PDF:', error);
+            }
+
+            // Send payment confirmation email with invoice
+            await sendPaymentConfirmationEmail({
+                to: order.email,
+                childName: order.child_details.name,
+                orderId: order.id,
+                invoicePdf,
+            });
+
+            Sentry.addBreadcrumb({
+                category: 'email',
+                message: `Payment confirmation email sent to ${order.email}`,
+                level: 'info',
+            });
+
+            return { emailSent: true, invoiceGenerated: !!invoicePdf };
+        });
+
+        return { success: true, ...result };
+    }
+);
+
 // Export all functions for the Inngest handler
-export const functions = [videoGenerationJob, paymentLinkEmail];
+export const functions = [videoGenerationJob, paymentLinkEmail, paymentCompletedEmail];

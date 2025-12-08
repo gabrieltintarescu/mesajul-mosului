@@ -1,5 +1,4 @@
 import { inngest } from '@/lib/inngest';
-import { sendOrderConfirmationEmail } from '@/lib/services/email';
 import { stripe } from '@/lib/stripe';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import * as Sentry from '@sentry/nextjs';
@@ -144,27 +143,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         });
     }
 
-    // Send order confirmation email
-    try {
-        await sendOrderConfirmationEmail({
-            to: order.email,
-            childName: order.child_details.name,
-            orderId: order.id,
-        });
-    } catch (emailError) {
-        Sentry.captureException(emailError, {
-            extra: { orderId, email: order.email, context: 'Failed to send confirmation email' },
-        });
-        console.error('Failed to send confirmation email:', emailError);
-    }
-
     // Trigger video generation via Inngest background job
     await inngest.send({
         name: 'video/generate.requested',
         data: { orderId },
     });
 
-    // Cancel the abandoned cart reminder by sending the payment completed event
+    // Send payment confirmation email with invoice via Inngest
     await inngest.send({
         name: 'order/payment.completed',
         data: { orderId },
