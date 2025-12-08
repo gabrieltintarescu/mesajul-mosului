@@ -64,7 +64,7 @@ export async function POST(request: Request) {
             metadata: {
                 orderId: order.id,
             },
-            success_url: `${appUrl}/order/${order.id}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `${appUrl}/order/${order.id}?payment=success&email=${encodeURIComponent(order.email)}&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${appUrl}/wizard/step3?orderId=${order.id}&payment=cancelled`,
         });
 

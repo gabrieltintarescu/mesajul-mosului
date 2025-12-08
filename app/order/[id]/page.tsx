@@ -10,12 +10,14 @@ import {
     Share2
 } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { Footer, Header } from '@/components/layout';
 import { VideoPlayer } from '@/components/sections';
 import { CTAButton, LoaderAnimation, StatusBadge } from '@/components/ui';
 import { useOrderStatus } from '@/hooks';
+import { useWizardStore } from '@/store';
 import { OrderStatus } from '@/types';
 
 const statusSteps: { status: OrderStatus; label: string; icon: string }[] = [
@@ -34,14 +36,42 @@ function getStepIndex(status: OrderStatus): number {
 
 export default function OrderStatusPage() {
     const params = useParams();
+    const searchParams = useSearchParams();
     const orderId = params.id as string;
-    const { order, isLoading, error, mutate } = useOrderStatus(orderId);
+
+    // Get email from wizard store or URL params
+    const { email: storeEmail, reset } = useWizardStore();
+    const urlEmail = searchParams.get('email');
+    const paymentSuccess = searchParams.get('payment') === 'success';
+
+    // Use email from store first, then URL, then localStorage fallback
+    const [email, setEmail] = useState<string | null>(null);
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    useEffect(() => {
+        setIsHydrated(true);
+        // Try to get email from various sources
+        const emailToUse = storeEmail || urlEmail || localStorage.getItem(`order_email_${orderId}`);
+        if (emailToUse) {
+            setEmail(emailToUse);
+            // Store email for future visits
+            localStorage.setItem(`order_email_${orderId}`, emailToUse);
+        }
+
+        // Clear wizard state if payment was successful
+        if (paymentSuccess && storeEmail) {
+            reset();
+        }
+    }, [storeEmail, urlEmail, orderId, paymentSuccess, reset]);
+
+    const { order, isLoading, error, mutate } = useOrderStatus(orderId, email);
 
     const currentStepIndex = order ? getStepIndex(order.status) : 0;
     const isCompleted = order?.status === 'completed';
     const isFailed = order?.status === 'failed';
 
-    if (isLoading && !order) {
+    // Show loading while hydrating or waiting for email
+    if (!isHydrated || (isLoading && !order) || (!email && !error)) {
         return (
             <>
                 <Header />
@@ -49,6 +79,32 @@ export default function OrderStatusPage() {
                     <div className="container mx-auto px-4">
                         <div className="flex flex-col items-center justify-center py-20">
                             <LoaderAnimation size="lg" text="Se încarcă comanda ta..." />
+                        </div>
+                    </div>
+                </div>
+                <Footer />
+            </>
+        );
+    }
+
+    // Show error if no email found
+    if (!email) {
+        return (
+            <>
+                <Header />
+                <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-green-50 pt-32 pb-16">
+                    <div className="container mx-auto px-4">
+                        <div className="max-w-lg mx-auto text-center py-20">
+                            <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-6" />
+                            <h1 className="text-2xl font-bold text-gray-900 mb-4">Verificare Email Necesară</h1>
+                            <p className="text-gray-600 mb-8">
+                                Pentru a vedea statusul comenzii, te rugăm să accesezi linkul primit pe email.
+                            </p>
+                            <Link href="/">
+                                <CTAButton icon={<Home className="w-5 h-5" />}>
+                                    Înapoi Acasă
+                                </CTAButton>
+                            </Link>
                         </div>
                     </div>
                 </div>

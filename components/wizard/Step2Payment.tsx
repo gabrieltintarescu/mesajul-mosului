@@ -1,7 +1,7 @@
 'use client';
 
 import { CTAButton } from '@/components/ui';
-import { completePaymentSession, createCheckoutSession } from '@/lib/api';
+import { createCheckoutSession, validateCoupon } from '@/lib/api';
 import { useWizardStore } from '@/store';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Check, CreditCard, Lock, Shield, Tag } from 'lucide-react';
@@ -11,8 +11,9 @@ import { useState } from 'react';
 
 export function Step2Payment() {
     const router = useRouter();
-    const { orderId, childDetails, reset } = useWizardStore();
+    const { orderId, childDetails } = useWizardStore();
     const [isProcessing, setIsProcessing] = useState(false);
+    const [paymentError, setPaymentError] = useState('');
     const [discountCode, setDiscountCode] = useState('');
     const [discountApplied, setDiscountApplied] = useState<{ code: string; amount: number } | null>(null);
     const [discountError, setDiscountError] = useState('');
@@ -32,22 +33,21 @@ export function Step2Payment() {
         setIsApplyingDiscount(true);
         setDiscountError('');
 
-        // Simulate API call to validate discount code
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        try {
+            const response = await validateCoupon(discountCode);
 
-        // Mock discount codes
-        const validCodes: Record<string, number> = {
-            'SANTA10': 10,
-            'CHRISTMAS20': 20,
-            'MAGIC15': 15,
-        };
-
-        const code = discountCode.toUpperCase();
-        if (validCodes[code]) {
-            setDiscountApplied({ code, amount: validCodes[code] });
-            setDiscountError('');
-        } else {
-            setDiscountError('Codul de reducere nu este valid');
+            if (response.success && response.data) {
+                // Convert cents to Lei for display
+                const discountInLei = Math.round(response.data.discountAmount / 100);
+                setDiscountApplied({ code: response.data.code, amount: discountInLei });
+                setDiscountError('');
+            } else {
+                setDiscountError(response.error || 'Codul de reducere nu este valid');
+                setDiscountApplied(null);
+            }
+        } catch (error) {
+            console.error('Error validating coupon:', error);
+            setDiscountError('Eroare la validarea codului');
             setDiscountApplied(null);
         }
 
@@ -67,24 +67,22 @@ export function Step2Payment() {
         }
 
         setIsProcessing(true);
+        setPaymentError('');
 
         try {
-            // Create checkout session (mocked)
+            // Create Stripe checkout session
             const checkoutResponse = await createCheckoutSession(orderId);
 
-            if (checkoutResponse.success && checkoutResponse.data) {
-                // Simulate payment completion
-                await completePaymentSession(orderId, `pi_${Date.now()}`);
-
-                // Clear wizard state
-                reset();
-
-                // Redirect to order status page
-                router.push(`/order/${orderId}`);
+            if (checkoutResponse.success && checkoutResponse.data?.url) {
+                // Redirect to Stripe Checkout
+                window.location.href = checkoutResponse.data.url;
+            } else {
+                setPaymentError(checkoutResponse.error || 'Eroare la crearea sesiunii de plată');
+                setIsProcessing(false);
             }
         } catch (error) {
             console.error('Payment error:', error);
-        } finally {
+            setPaymentError('Eroare la procesarea plății. Te rugăm să încerci din nou.');
             setIsProcessing(false);
         }
     };
@@ -167,55 +165,41 @@ export function Step2Payment() {
                             </div>
                         </div>
 
-                        {/* Mock Card Form */}
-                        <div className="space-y-4 mb-8">
-                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Număr Card
-                                </label>
-                                <div className="flex items-center gap-3">
-                                    <CreditCard className="w-5 h-5 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="4242 4242 4242 4242"
-                                        className="flex-1 bg-transparent border-none outline-none text-gray-900 placeholder:text-gray-400"
-                                        disabled
-                                    />
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-2xl">💳</span>
+                        {/* Stripe Checkout Info */}
+                        <div className="mb-8">
+                            <div className="p-6 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl border border-gray-200">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="p-2 bg-white rounded-lg shadow-sm">
+                                        <CreditCard className="w-6 h-6 text-blue-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900">Plată Securizată cu Stripe</h3>
+                                        <p className="text-sm text-gray-500">Vei fi redirecționat către pagina de plată Stripe</p>
                                     </div>
                                 </div>
+                                <ul className="space-y-2 text-sm text-gray-600">
+                                    <li className="flex items-center gap-2">
+                                        <Check className="w-4 h-4 text-green-500" />
+                                        Card de credit sau debit
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <Check className="w-4 h-4 text-green-500" />
+                                        Apple Pay & Google Pay
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <Check className="w-4 h-4 text-green-500" />
+                                        Criptat end-to-end
+                                    </li>
+                                </ul>
                             </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Data Expirării
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="LL/AA"
-                                        className="w-full bg-transparent border-none outline-none text-gray-900 placeholder:text-gray-400"
-                                        disabled
-                                    />
-                                </div>
-                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        CVC
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="123"
-                                        className="w-full bg-transparent border-none outline-none text-gray-900 placeholder:text-gray-400"
-                                        disabled
-                                    />
-                                </div>
-                            </div>
-
-                            <p className="text-sm text-gray-500 text-center">
-                                💡 Acesta este un demo - apasă mai jos pentru a simula plata
-                            </p>
                         </div>
+
+                        {/* Payment Error */}
+                        {paymentError && (
+                            <div className="mb-6 p-4 bg-red-50 rounded-xl border border-red-200">
+                                <p className="text-sm text-red-600">{paymentError}</p>
+                            </div>
+                        )}
 
                         {/* Discount Code */}
                         <div className="mb-6">

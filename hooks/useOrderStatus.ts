@@ -9,12 +9,12 @@ interface UseOrderStatusReturn {
     mutate: () => void;
 }
 
-export function useOrderStatus(orderId: string | null): UseOrderStatusReturn {
+export function useOrderStatus(orderId: string | null, email: string | null): UseOrderStatusReturn {
     const { data, error, isLoading, mutate } = useSWR(
-        orderId ? ['orderStatus', orderId] : null,
+        orderId && email ? ['orderStatus', orderId, email] : null,
         async () => {
-            if (!orderId) return null;
-            const response = await getOrderStatus(orderId);
+            if (!orderId || !email) return null;
+            const response = await getOrderStatus(orderId, email);
             if (response.success && response.data) {
                 return response.data.order;
             }
