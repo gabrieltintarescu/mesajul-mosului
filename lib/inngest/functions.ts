@@ -1,4 +1,4 @@
-import { sendAbandonedCartEmail, sendVideoReadyEmail } from '@/lib/services/email';
+import { sendPaymentLinkEmail, sendVideoReadyEmail } from '@/lib/services/email';
 import { createHeyGenVideo, getHeyGenVideoStatus } from '@/lib/services/heygen';
 import { generateSantaScript } from '@/lib/services/openai';
 import { processVideoWithAssets } from '@/lib/services/video';
@@ -237,29 +237,20 @@ export const videoGenerationJob = inngest.createFunction(
 );
 
 /**
- * Abandoned cart reminder - sends email if order is unpaid after 30 minutes
+ * Payment link email - sends email immediately after order creation with payment link
+ * If user completes payment, the link simply won't work twice (Stripe handles this)
  */
-export const abandonedCartReminder = inngest.createFunction(
+export const paymentLinkEmail = inngest.createFunction(
     {
-        id: 'abandoned-cart-reminder',
-        name: 'Abandoned Cart Reminder',
-        cancelOn: [
-            {
-                // Cancel this function if payment is received
-                event: 'order/payment.completed',
-                match: 'data.orderId',
-            },
-        ],
+        id: 'payment-link-email',
+        name: 'Payment Link Email',
     },
     { event: 'order/created' },
     async ({ event, step }) => {
         const { orderId } = event.data;
 
-        // Wait 30 minutes before checking
-        await step.sleep('wait-30-minutes', '30m');
-
-        // Check if order is still unpaid
-        const order = await step.run('check-order-status', async () => {
+        // Get order details
+        const order = await step.run('fetch-order', async () => {
             const { data, error } = await supabaseAdmin
                 .from('orders')
                 .select('*')
@@ -273,14 +264,14 @@ export const abandonedCartReminder = inngest.createFunction(
             return data;
         });
 
-        // If order doesn't exist or is already paid/processing, skip
-        if (!order || order.status !== 'pending_payment') {
-            return { skipped: true, reason: 'Order not in pending_payment status' };
+        // If order doesn't exist, skip
+        if (!order) {
+            return { skipped: true, reason: 'Order not found' };
         }
 
-        // Send abandoned cart email
-        await step.run('send-reminder-email', async () => {
-            await sendAbandonedCartEmail({
+        // Send payment link email immediately
+        await step.run('send-payment-link-email', async () => {
+            await sendPaymentLinkEmail({
                 to: order.email,
                 childName: order.child_details.name,
                 orderId: order.id,
@@ -288,7 +279,7 @@ export const abandonedCartReminder = inngest.createFunction(
 
             Sentry.addBreadcrumb({
                 category: 'email',
-                message: `Abandoned cart email sent to ${order.email}`,
+                message: `Payment link email sent to ${order.email}`,
                 level: 'info',
             });
         });
@@ -298,4 +289,4 @@ export const abandonedCartReminder = inngest.createFunction(
 );
 
 // Export all functions for the Inngest handler
-export const functions = [videoGenerationJob, abandonedCartReminder];
+export const functions = [videoGenerationJob, paymentLinkEmail];

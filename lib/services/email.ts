@@ -153,21 +153,21 @@ export async function sendOrderConfirmationEmail({
     });
 }
 
-interface SendAbandonedCartEmailParams {
+interface SendPaymentLinkEmailParams {
     to: string;
     childName: string;
     orderId: string;
 }
 
 /**
- * Send abandoned cart reminder email in Romanian
- * Includes a link to complete the payment
+ * Send payment link email in Romanian
+ * Sent immediately after order creation with link to complete payment
  */
-export async function sendAbandonedCartEmail({
+export async function sendPaymentLinkEmail({
     to,
     childName,
     orderId,
-}: SendAbandonedCartEmailParams): Promise<void> {
+}: SendPaymentLinkEmailParams): Promise<void> {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     // Include email in URL for secure order lookup
     const paymentUrl = `${appUrl}/wizard/step3?orderId=${orderId}&email=${encodeURIComponent(to)}`;
@@ -175,7 +175,7 @@ export async function sendAbandonedCartEmail({
     await getResend().emails.send({
         from: process.env.EMAIL_FROM || 'Moș Crăciun <mos@yourdomain.com>',
         to,
-        subject: `🎅 Moș Crăciun așteaptă să trimită un mesaj pentru ${childName}!`,
+        subject: `🎅 Finalizează comanda pentru videoclipul lui ${childName}!`,
         html: `
 <!DOCTYPE html>
 <html>
@@ -191,30 +191,31 @@ export async function sendAbandonedCartEmail({
                     🎄 Ho Ho Ho! 🎄
                 </h1>
                 <p style="color: #ffd700; margin-top: 10px; font-size: 18px;">
-                    Moș Crăciun te așteaptă!
+                    Comanda ta a fost înregistrată!
                 </p>
             </td>
         </tr>
         <tr>
             <td style="padding: 40px; text-align: center;">
                 <h2 style="color: #1a472a; margin: 0 0 20px 0; font-size: 24px;">
-                    Comanda ta nu a fost finalizată 🎁
+                    Un pas până la magia Crăciunului! 🎁
                 </h2>
                 <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
                     Dragă părinte,
                 </p>
                 <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
-                    Am observat că ai început să comanzi un mesaj video personalizat de la Moș Crăciun pentru <strong>${childName}</strong>, dar nu ai finalizat plata.
+                    Mulțumim că ai ales să oferi un cadou magic pentru <strong>${childName}</strong>! 
+                    Comanda ta a fost înregistrată cu succes.
                 </p>
                 <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
-                    Moșul și spiridușii sunt pregătiți să creeze un mesaj magic special pentru ${childName}! 
-                    Finalizează comanda acum și surprinde-ți copilul cu cel mai frumos cadou de Crăciun.
+                    Pentru a primi videoclipul personalizat de la Moș Crăciun, te rugăm să finalizezi plata 
+                    folosind butonul de mai jos:
                 </p>
                 <a href="${paymentUrl}" 
                    style="display: inline-block; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); 
                           color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 30px; 
                           font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(196, 30, 58, 0.4);">
-                    🎬 Finalizează Comanda
+                    💳 Finalizează Plata
                 </a>
                 <p style="color: #666666; font-size: 14px; margin-top: 30px;">
                     Sau accesează direct: <a href="${paymentUrl}" style="color: #c41e3a;">${paymentUrl}</a>
@@ -241,3 +242,6 @@ export async function sendAbandonedCartEmail({
         `,
     });
 }
+
+// Keep the old function as an alias for backwards compatibility
+export const sendAbandonedCartEmail = sendPaymentLinkEmail;
