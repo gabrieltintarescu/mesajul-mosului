@@ -1,4 +1,4 @@
-import { isValidEmail, rateLimit, sanitizeString } from '@/lib/security';
+import { isValidEmail, rateLimit } from '@/lib/security';
 import { ChildDetails, InvoicingDetails } from '@/lib/supabase/database.types';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import * as Sentry from '@sentry/nextjs';

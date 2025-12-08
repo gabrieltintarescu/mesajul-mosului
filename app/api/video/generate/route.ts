@@ -13,13 +13,13 @@ export interface GenerateVideoRequest {
 function verifyInternalApiKey(request: Request): boolean {
     const apiKey = request.headers.get('x-api-key');
     const internalKey = process.env.INTERNAL_API_KEY;
-    
+
     // If no internal key is set, reject all requests (fail secure)
     if (!internalKey) {
         console.error('INTERNAL_API_KEY is not set - rejecting request');
         return false;
     }
-    
+
     return apiKey === internalKey;
 }
 
