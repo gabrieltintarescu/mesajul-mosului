@@ -4,7 +4,7 @@
 :root {
   --christmas-red: #c41e3a;
   --christmas-green: #228b22;
-  --christmas-gold: #ffd700;
+  --christmas-gold: #d4af37;
   --christmas-cream: #fffef0;
   --christmas-dark: #1a1a2e;
 }
@@ -13,7 +13,7 @@
 @theme {
   --color-christmas-red: #c41e3a;
   --color-christmas-green: #228b22;
-  --color-christmas-gold: #ffd700;
+  --color-christmas-gold: #d4af37;
   --color-christmas-cream: #fffef0;
   --color-christmas-dark: #1a1a2e;
 }

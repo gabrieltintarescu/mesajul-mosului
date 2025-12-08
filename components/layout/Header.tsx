@@ -117,19 +117,13 @@ export function Header() {
                             exit={{ opacity: 0, height: 0 }}
                             className="md:hidden overflow-hidden"
                         >
-                            <div className="py-4 space-y-3">
+                            <div className="py-4 space-y-3 bg-white/95 backdrop-blur-md rounded-lg px-4 mt-2 shadow-lg">
                                 {navLinks.map((link) => (
                                     <Link
                                         key={link.href}
                                         href={link.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className={`
-                      block py-2 font-medium transition-colors
-                      ${isScrolled
-                                                ? 'text-gray-700 hover:text-christmas-red'
-                                                : 'text-white/90 hover:text-white'
-                                            }
-                    `}
+                                        className="block py-2 font-medium text-gray-700 hover:text-christmas-red transition-colors"
                                     >
                                         {link.label}
                                     </Link>
