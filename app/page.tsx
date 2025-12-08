@@ -548,7 +548,7 @@ export default function Home() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-24 bg-gradient-to-b from-white to-red-50 relative">
+      <section id="pricing" className="pt-0 md:pt-12 pb-24 bg-gradient-to-b from-white to-red-50 relative">
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-christmas-red/10 text-christmas-red mb-6">

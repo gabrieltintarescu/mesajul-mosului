@@ -79,7 +79,7 @@ export function TestimonialsSlider() {
             {/* Quote decoration */}
             <Quote className="absolute -top-4 -left-4 w-16 h-16 text-christmas-gold/20 transform -rotate-12" />
 
-            <div className="relative overflow-hidden py-8 px-4">
+            <div className="relative overflow-hidden py-2 md:py-8 px-4">
                 <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
                         key={currentIndex}
@@ -89,28 +89,28 @@ export function TestimonialsSlider() {
                         animate="center"
                         exit="exit"
                         transition={{ duration: 0.4, ease: 'easeInOut' }}
-                        className="bg-white rounded-3xl shadow-xl p-8 md:p-12"
+                        className="bg-white rounded-xl md:rounded-3xl shadow-xl p-4 md:p-12"
                     >
                         {/* Stars */}
-                        <div className="flex items-center justify-center gap-1 mb-6">
+                        <div className="flex items-center justify-center gap-0.5 md:gap-1 mb-2 md:mb-6">
                             {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
-                                <Star key={i} className="w-6 h-6 text-christmas-gold fill-current" />
+                                <Star key={i} className="w-3 h-3 md:w-6 md:h-6 text-christmas-gold fill-current" />
                             ))}
                         </div>
 
                         {/* Content */}
-                        <p className="text-xl md:text-2xl text-gray-700 text-center leading-relaxed mb-8">
+                        <p className="text-sm md:text-2xl text-gray-700 text-center leading-snug md:leading-relaxed mb-3 md:mb-8">
                             "{testimonials[currentIndex].content}"
                         </p>
 
                         {/* Author */}
                         <div className="flex flex-col items-center">
-                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-christmas-red to-red-600 
-                flex items-center justify-center text-white text-xl font-bold mb-3">
+                            <div className="w-8 h-8 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-christmas-red to-red-600 
+                flex items-center justify-center text-white text-sm md:text-xl font-bold mb-1.5 md:mb-3">
                                 {testimonials[currentIndex].name.charAt(0)}
                             </div>
-                            <p className="font-semibold text-gray-900">{testimonials[currentIndex].name}</p>
-                            <p className="text-sm text-gray-500">{testimonials[currentIndex].location}</p>
+                            <p className="text-sm md:text-base font-semibold text-gray-900">{testimonials[currentIndex].name}</p>
+                            <p className="text-xs md:text-sm text-gray-500">{testimonials[currentIndex].location}</p>
                         </div>
                     </motion.div>
                 </AnimatePresence>
