@@ -70,9 +70,14 @@ export function Step2Payment() {
     // Calculate display price - use order's actual price or stored price
     const finalPriceCents = orderPricing?.finalPriceCents ?? orderFinalPriceCents ?? 8900;
     const totalPriceLei = finalPriceCents / 100;
-    const discountAmountLei = (orderPricing?.discountAmountCents ?? 0) / 100;
-    const basePriceLei = totalPriceLei + discountAmountLei;
+    const couponDiscountLei = (orderPricing?.discountAmountCents ?? 0) / 100;
     const couponCode = orderPricing?.couponCode;
+
+    // Marketing: Show original price as 129 Lei with 40 Lei holiday discount
+    const marketingOriginalPrice = 129;
+    const holidayDiscount = 40;
+    // The base price after holiday discount (what we actually charge before coupons)
+    const basePriceAfterHoliday = marketingOriginalPrice - holidayDiscount; // 89 Lei
 
     const handleApplyDiscount = async () => {
         if (!discountCode.trim()) {
@@ -230,15 +235,19 @@ export function Step2Payment() {
                             <div className="border-t border-gray-100 pt-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-600">Pachet Video HD</span>
-                                    <span className="font-semibold">{totalPriceLei + discountAmountLei} Lei</span>
+                                    <span className="font-semibold">{marketingOriginalPrice} Lei</span>
                                 </div>
-                                {discountAmountLei > 0 && (
+                                <div className="flex justify-between items-center text-sm text-christmas-green mt-1">
+                                    <span>🎄 Reducere de Sărbători</span>
+                                    <span>-{holidayDiscount} Lei</span>
+                                </div>
+                                {couponDiscountLei > 0 && (
                                     <div className="flex justify-between items-center text-sm text-christmas-green mt-1">
                                         <span className="flex items-center gap-1">
                                             <Tag className="w-3 h-3" />
-                                            {couponCode ? `Cod: ${couponCode}` : 'Reducere'}
+                                            Cod: {couponCode}
                                         </span>
-                                        <span>-{discountAmountLei} Lei</span>
+                                        <span>-{couponDiscountLei} Lei</span>
                                     </div>
                                 )}
                             </div>
