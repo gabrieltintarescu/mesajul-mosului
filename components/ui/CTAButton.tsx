@@ -26,6 +26,7 @@ export function CTAButton({
     inline-flex items-center justify-center gap-2
     font-semibold rounded-full
     transition-all duration-300 ease-out
+    cursor-pointer
     focus:outline-none focus:ring-4
     disabled:opacity-60 disabled:cursor-not-allowed
   `;

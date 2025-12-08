@@ -21,7 +21,7 @@ export function Header() {
     }, []);
 
     const navLinks = [
-        { href: '/#how-it-works', label: 'Cum Funcționează' },
+        { href: '/#how-it-works', label: 'Instrucțiuni' },
         { href: '/#testimonials', label: 'Recenzii' },
         { href: '/#pricing', label: 'Prețuri' },
     ];
@@ -57,7 +57,7 @@ export function Header() {
               ${isScrolled ? 'text-christmas-red' : 'text-white'}
               group-hover:text-christmas-gold
             `}>
-                            Santa<span className="text-christmas-gold">AI</span>
+                            Mesaj de la <span className="text-christmas-gold">Mosu'</span>
                         </span>
                     </Link>
 

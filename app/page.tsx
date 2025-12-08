@@ -77,17 +77,17 @@ export default function Home() {
     {
       icon: MessageCircle,
       title: 'Scenariu Personalizat',
-      description: 'Moș Crăciun îl pomenește pe copilul tău pe nume, îi laudă realizările și vorbește despre lucrurile lui preferate.',
+      description: 'Moș Crăciun îl strigă pe copilul tău pe nume, îi laudă realizările și vorbește despre lucrurile lui preferate.',
     },
     {
       icon: Video,
       title: 'Calitate Video HD',
-      description: 'Video cristal de clar care arată uimitor pe orice dispozitiv. Descarcă și păstrează pentru totdeauna.',
+      description: 'Video de înaltă calitate care arată uimitor pe orice dispozitiv. Descarcă-l și păstrează-l pentru totdeauna.',
     },
     {
       icon: Clock,
       title: 'Gata în 15 Minute',
-      description: 'AI-ul nostru generează rapid videoclipul personalizat. Îl primești direct pe email.',
+      description: 'Ne mândrim cu livrearea rapidă a videoclipului personalizat. Îl primești direct pe email.',
     },
     {
       icon: Heart,
@@ -101,8 +101,8 @@ export default function Home() {
     },
     {
       icon: Zap,
-      title: 'Magie cu AI',
-      description: 'Tehnologia AI avansată creează videoclipuri naturale și captivante care par autentice.',
+      title: 'Tehnologie Avansată',
+      description: 'Folosim cele mai noi tehnologii pentru a crea videoclipuri naturale și captivante care par autentice.',
     },
   ];
 
@@ -121,8 +121,8 @@ export default function Home() {
     },
     {
       step: 3,
-      title: 'AI Creează Magia',
-      description: 'AI-ul nostru generează un scenariu și video personalizat special pentru copilul tău.',
+      title: 'Creăm Magia',
+      description: 'Echipa noastră creează un video personalizat special pentru copilul tău.',
       icon: '✨',
     },
     {
@@ -182,7 +182,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-xl md:text-2xl text-white/80 mb-10 max-w-2xl mx-auto"
             >
-              Creează amintiri de Crăciun de neuitat cu un video magic generat de AI, în care Moșul vorbește direct cu copilul tău.
+              Creează amintiri de Crăciun de neuitat cu un video magic, în care Moșul vorbește direct cu copilul tău.
             </motion.p>
 
             {/* CTA Buttons */}
@@ -198,14 +198,14 @@ export default function Home() {
                   icon={<Sparkles className="w-5 h-5" />}
                   className="animate-pulse-glow"
                 >
-                  Creează Videoclipul - 89 Lei
+                  Creează videoclipul - 89 Lei
                 </CTAButton>
               </Link>
 
               <a href="#demo">
-                <CTAButton variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-christmas-red">
+                <CTAButton size="lg" className="!bg-none !bg-transparent !border-2 !border-white !text-white !shadow-none hover:!bg-white/20 hover:!text-white">
                   <Play className="w-5 h-5" />
-                  Vezi Demo
+                  Vezi demo
                 </CTAButton>
               </a>
             </motion.div>
@@ -219,7 +219,7 @@ export default function Home() {
             >
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-christmas-green" />
-                <span>50.000+ Familii Fericite</span>
+                <span>50.000+ Familii fericite</span>
               </div>
               <div className="flex items-center gap-2">
                 <Star className="w-5 h-5 text-christmas-gold fill-current" />
@@ -247,14 +247,14 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 bg-gradient-to-b from-white to-red-50">
+      <section id="features" className="py-24 bg-gradient-to-b from-white to-red-50 relative overflow-hidden">
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
-              De Ce Să Alegi <span className="text-christmas-red">SantaAI</span>?
+              De ce să alegi <span className="text-christmas-red">Mesaj de la Moșu</span>?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Combinăm tehnologia AI de ultimă generație cu magia Crăciunului pentru experiențe cu adevărat personalizate.
+              Combinăm tehnologia de ultimă generație cu magia Crăciunului pentru experiențe cu adevărat personalizate.
             </p>
           </MotionFadeIn>
 
@@ -312,6 +312,13 @@ export default function Home() {
         {/* Dark Overlay - stronger on mobile for readability */}
         <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-black/80 via-black/70 to-black/50 md:to-transparent" />
 
+
+        {/* Wave divider */}
+        <div className="absolute bottom-0 left-0 right-0 z-10">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+            <path d="M0,40 C240,100 480,10 720,60 C960,110 1200,20 1440,80 L1440,120 L0,120 Z" fill="white" />
+          </svg>
+        </div>
         {/* Content */}
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl mx-auto md:mx-0 text-center md:text-left">
@@ -348,7 +355,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
-              Cum Funcționează
+              Cum funcționează?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Creează videoclipul personalizat de la Moș Crăciun în doar 4 pași simpli.
@@ -542,8 +549,6 @@ export default function Home() {
             />
           </div>
         </div>
-
-
       </section>
 
       {/* Final CTA Section */}
@@ -567,9 +572,8 @@ export default function Home() {
               </p>
               <Link href="/wizard/step1">
                 <CTAButton
-                  variant="outline"
                   size="lg"
-                  className="border-white text-white hover:bg-white hover:text-christmas-red"
+                  className="!bg-transparent !border-2 !border-white !text-white !shadow-none hover:!bg-white/20 hover:!text-white"
                   icon={<Sparkles className="w-5 h-5" />}
                 >
                   Creează Videoclipul Acum
@@ -580,9 +584,9 @@ export default function Home() {
         </div>
 
         {/* Wave divider */}
-        <div className="absolute bottom-0 left-0 right-0 z-10">
-          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
-            <path d="M0,30 C480,80 960,10 1440,50 L1440,80 L0,80 Z" fill="#1f2937" />
+        <div className="absolute -bottom-px left-0 right-0 z-10">
+          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="block w-full h-auto" preserveAspectRatio="none">
+            <path d="M0,30 C480,80 960,10 1440,50 L1440,81 L0,81 Z" fill="#111827" />
           </svg>
         </div>
       </section>

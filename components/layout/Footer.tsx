@@ -42,14 +42,6 @@ export function Footer() {
 
     return (
         <footer className="bg-gradient-to-b from-gray-900 to-gray-950 text-white">
-            {/* Snow decoration */}
-            <div className="h-8 bg-gradient-to-b from-transparent to-gray-900 relative overflow-hidden">
-                <div className="absolute bottom-0 left-0 right-0 h-4 bg-white"
-                    style={{
-                        clipPath: 'polygon(0 100%, 5% 60%, 10% 100%, 15% 70%, 20% 100%, 25% 60%, 30% 100%, 35% 80%, 40% 100%, 45% 60%, 50% 100%, 55% 70%, 60% 100%, 65% 60%, 70% 100%, 75% 80%, 80% 100%, 85% 60%, 90% 100%, 95% 70%, 100% 100%)'
-                    }}
-                />
-            </div>
 
             <div className="container mx-auto px-4 py-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
