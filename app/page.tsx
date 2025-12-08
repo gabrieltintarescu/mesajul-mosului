@@ -326,8 +326,8 @@ export default function Home() {
               <p className="text-base md:text-xl text-white/80 mb-6 md:mb-8 leading-relaxed">
                 Imaginează-ți chipul copilului tău când Moș Crăciun îi spune pe nume și vorbește despre realizările lui.
               </p>
-              <Link href="/wizard/step1">
-                <CTAButton size="lg" icon={<ArrowRight className="w-5 h-5" />} className="w-full sm:w-auto">
+              <Link href="/wizard/step1" className="inline-block">
+                <CTAButton icon={<ArrowRight className="w-4 h-4" />}>
                   Creează Videoclipul Acum
                 </CTAButton>
               </Link>
