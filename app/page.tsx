@@ -303,7 +303,7 @@ export default function Home() {
       </section>
 
       {/* Santa Banner Section */}
-      <section className="relative py-16 md:py-32 overflow-hidden">
+      <section className="relative py-16 md:py-32 overflow-hidden bg-[#1a1a1a]">
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center md:bg-right bg-no-repeat"
@@ -334,10 +334,17 @@ export default function Home() {
             </MotionFadeIn>
           </div>
         </div>
+
+        {/* Wave divider */}
+        <div className="absolute bottom-0 left-0 right-0 z-10">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+            <path d="M0,40 C240,100 480,10 720,60 C960,110 1200,20 1440,80 L1440,120 L0,120 Z" fill="white" />
+          </svg>
+        </div>
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 bg-white">
+      <section id="how-it-works" className="py-24 bg-white relative">
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
@@ -388,11 +395,18 @@ export default function Home() {
               </CTAButton>
             </Link>
           </MotionFadeIn>
+
+          {/* Wave divider */}
+          <div className="absolute bottom-0 left-0 right-0">
+            <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+              <path d="M0,20 C480,80 960,0 1440,40 L1440,80 L0,80 Z" fill="#fef2f2" />
+            </svg>
+          </div>
         </div>
       </section>
 
       {/* Demo Video Section */}
-      <section id="demo" className="py-24 bg-gradient-to-b from-red-50 to-white">
+      <section id="demo" className="py-24 bg-gradient-to-b from-red-50 to-white relative">
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
@@ -430,10 +444,16 @@ export default function Home() {
             </Link>
           </MotionFadeIn>
         </div>
+        {/* Wave divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+            <path d="M0,60 C360,10 720,70 1080,30 C1260,10 1380,40 1440,20 L1440,80 L0,80 Z" fill="#f0fdf4" />
+          </svg>
+        </div>
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-24 bg-gradient-to-b from-green-50 to-white">
+      <section id="testimonials" className="py-24 bg-gradient-to-b from-green-50 to-white relative">
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
@@ -479,10 +499,17 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        {/* Wave divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+            <path d="M0,40 C240,80 720,10 1200,60 L1440,40 L1440,80 L0,80 Z" fill="white" />
+          </svg>
+        </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-24 bg-gradient-to-b from-white to-red-50">
+      <section id="pricing" className="py-24 bg-gradient-to-b from-white to-red-50 relative">
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-christmas-red/10 text-christmas-red mb-6">
@@ -515,6 +542,8 @@ export default function Home() {
             />
           </div>
         </div>
+
+
       </section>
 
       {/* Final CTA Section */}
@@ -548,6 +577,13 @@ export default function Home() {
               </Link>
             </MotionFadeIn>
           </div>
+        </div>
+
+        {/* Wave divider */}
+        <div className="absolute bottom-0 left-0 right-0 z-10">
+          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+            <path d="M0,30 C480,80 960,10 1440,50 L1440,80 L0,80 Z" fill="#1f2937" />
+          </svg>
         </div>
       </section>
 
