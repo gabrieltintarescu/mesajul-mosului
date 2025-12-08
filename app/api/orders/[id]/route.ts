@@ -6,9 +6,20 @@ interface RouteParams {
 }
 
 // GET /api/orders/[id] - Get order by ID
+// Requires email query param for verification (prevents order enumeration)
 export async function GET(request: Request, { params }: RouteParams) {
     try {
         const { id } = await params;
+        const { searchParams } = new URL(request.url);
+        const email = searchParams.get('email');
+
+        // Require email for verification to prevent order ID enumeration
+        if (!email) {
+            return NextResponse.json(
+                { success: false, error: 'Email verification required' },
+                { status: 400 }
+            );
+        }
 
         const { data: order, error } = await supabaseAdmin
             .from('orders')
@@ -17,6 +28,15 @@ export async function GET(request: Request, { params }: RouteParams) {
             .single();
 
         if (error || !order) {
+            return NextResponse.json(
+                { success: false, error: 'Order not found' },
+                { status: 404 }
+            );
+        }
+
+        // Verify email matches the order (case-insensitive)
+        if (order.email.toLowerCase() !== email.toLowerCase()) {
+            // Return same error as "not found" to prevent enumeration
             return NextResponse.json(
                 { success: false, error: 'Order not found' },
                 { status: 404 }

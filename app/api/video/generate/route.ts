@@ -9,9 +9,32 @@ export interface GenerateVideoRequest {
     orderId: string;
 }
 
+// Verify internal API key for protected endpoints
+function verifyInternalApiKey(request: Request): boolean {
+    const apiKey = request.headers.get('x-api-key');
+    const internalKey = process.env.INTERNAL_API_KEY;
+    
+    // If no internal key is set, reject all requests (fail secure)
+    if (!internalKey) {
+        console.error('INTERNAL_API_KEY is not set - rejecting request');
+        return false;
+    }
+    
+    return apiKey === internalKey;
+}
+
 // POST /api/video/generate - Generate video for an order
 // This is the main video generation worker that handles the entire pipeline
+// PROTECTED: Requires INTERNAL_API_KEY header
 export async function POST(request: Request) {
+    // Verify internal API key - this endpoint should only be called by trusted services
+    if (!verifyInternalApiKey(request)) {
+        return NextResponse.json(
+            { success: false, error: 'Unauthorized' },
+            { status: 401 }
+        );
+    }
+
     let orderId: string | null = null;
 
     try {

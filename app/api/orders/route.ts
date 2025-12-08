@@ -1,3 +1,4 @@
+import { isValidEmail, rateLimit, sanitizeString } from '@/lib/security';
 import { ChildDetails, InvoicingDetails } from '@/lib/supabase/database.types';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import * as Sentry from '@sentry/nextjs';
@@ -12,6 +13,12 @@ export interface CreateOrderRequest {
 
 // POST /api/orders - Create a new order
 export async function POST(request: Request) {
+    // Rate limit: 5 orders per minute per IP
+    const rateLimitResponse = rateLimit(request, { windowMs: 60000, maxRequests: 5 });
+    if (rateLimitResponse) {
+        return rateLimitResponse;
+    }
+
     try {
         const body: CreateOrderRequest = await request.json();
 
@@ -19,6 +26,14 @@ export async function POST(request: Request) {
         if (!body.email || !body.childDetails) {
             return NextResponse.json(
                 { success: false, error: 'Email and child details are required' },
+                { status: 400 }
+            );
+        }
+
+        // Validate email format
+        if (!isValidEmail(body.email)) {
+            return NextResponse.json(
+                { success: false, error: 'Invalid email format' },
                 { status: 400 }
             );
         }

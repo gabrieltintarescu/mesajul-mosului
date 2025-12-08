@@ -1,3 +1,4 @@
+import { verifyAdminToken } from '@/lib/security';
 import { OrderStatus } from '@/lib/supabase/database.types';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
@@ -72,10 +73,4 @@ export async function GET(request: Request) {
             { status: 500 }
         );
     }
-}
-
-function verifyAdminToken(authHeader: string): boolean {
-    const token = authHeader.replace('Bearer ', '');
-    // Simple token verification - in production, use JWT
-    return token === 'admin_token_' + process.env.ADMIN_PASSWORD;
 }

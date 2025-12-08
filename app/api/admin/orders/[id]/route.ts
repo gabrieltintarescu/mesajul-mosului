@@ -1,3 +1,4 @@
+import { verifyAdminToken } from '@/lib/security';
 import { OrderRow, OrderStatus } from '@/lib/supabase/database.types';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
@@ -130,9 +131,4 @@ export async function GET(request: Request, { params }: RouteParams) {
             { status: 500 }
         );
     }
-}
-
-function verifyAdminToken(authHeader: string): boolean {
-    const token = authHeader.replace('Bearer ', '');
-    return token === 'admin_token_' + process.env.ADMIN_PASSWORD;
 }
