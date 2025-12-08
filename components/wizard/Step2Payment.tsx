@@ -4,7 +4,7 @@ import { CTAButton } from '@/components/ui';
 import { completePaymentSession, createCheckoutSession } from '@/lib/api';
 import { useWizardStore } from '@/store';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check, CreditCard, Lock, Shield } from 'lucide-react';
+import { ArrowLeft, Check, CreditCard, Lock, Shield, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -13,10 +13,56 @@ export function Step2Payment() {
     const router = useRouter();
     const { orderId, childDetails, reset } = useWizardStore();
     const [isProcessing, setIsProcessing] = useState(false);
+    const [discountCode, setDiscountCode] = useState('');
+    const [discountApplied, setDiscountApplied] = useState<{ code: string; amount: number } | null>(null);
+    const [discountError, setDiscountError] = useState('');
+    const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
+
+    const basePrice = 129;
+    const holidayDiscount = 40;
+    const discountAmount = discountApplied?.amount || 0;
+    const totalPrice = basePrice - holidayDiscount - discountAmount;
+
+    const handleApplyDiscount = async () => {
+        if (!discountCode.trim()) {
+            setDiscountError('Te rugăm să introduci un cod de reducere');
+            return;
+        }
+
+        setIsApplyingDiscount(true);
+        setDiscountError('');
+
+        // Simulate API call to validate discount code
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Mock discount codes
+        const validCodes: Record<string, number> = {
+            'SANTA10': 10,
+            'CHRISTMAS20': 20,
+            'MAGIC15': 15,
+        };
+
+        const code = discountCode.toUpperCase();
+        if (validCodes[code]) {
+            setDiscountApplied({ code, amount: validCodes[code] });
+            setDiscountError('');
+        } else {
+            setDiscountError('Codul de reducere nu este valid');
+            setDiscountApplied(null);
+        }
+
+        setIsApplyingDiscount(false);
+    };
+
+    const handleRemoveDiscount = () => {
+        setDiscountApplied(null);
+        setDiscountCode('');
+        setDiscountError('');
+    };
 
     const handlePayment = async () => {
         if (!orderId) {
-            router.push('/wizard/step1');
+            router.push('/wizard/step2');
             return;
         }
 
@@ -74,18 +120,27 @@ export function Step2Payment() {
                             <div className="border-t border-gray-100 pt-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-600">Pachet Video</span>
-                                    <span className="font-semibold">129 Lei</span>
+                                    <span className="font-semibold">{basePrice} Lei</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm text-christmas-green mt-1">
                                     <span>Reducere de Sărbători</span>
-                                    <span>-40 Lei</span>
+                                    <span>-{holidayDiscount} Lei</span>
                                 </div>
+                                {discountApplied && (
+                                    <div className="flex justify-between items-center text-sm text-christmas-green mt-1">
+                                        <span className="flex items-center gap-1">
+                                            <Tag className="w-3 h-3" />
+                                            Cod: {discountApplied.code}
+                                        </span>
+                                        <span>-{discountApplied.amount} Lei</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="border-t border-gray-100 pt-4">
                                 <div className="flex justify-between items-center">
                                     <span className="font-bold text-gray-900">Total</span>
-                                    <span className="text-2xl font-bold text-christmas-red">89 Lei</span>
+                                    <span className="text-2xl font-bold text-christmas-red">{totalPrice} Lei</span>
                                 </div>
                             </div>
                         </div>
@@ -162,6 +217,56 @@ export function Step2Payment() {
                             </p>
                         </div>
 
+                        {/* Discount Code */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Cod de Reducere
+                            </label>
+                            {discountApplied ? (
+                                <div className="flex items-center justify-between p-4 bg-green-50 rounded-xl border border-green-200">
+                                    <div className="flex items-center gap-2 text-christmas-green">
+                                        <Tag className="w-5 h-5" />
+                                        <span className="font-medium">{discountApplied.code}</span>
+                                        <span className="text-sm">(-{discountApplied.amount} Lei)</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleRemoveDiscount}
+                                        className="text-sm text-gray-500 hover:text-christmas-red transition-colors"
+                                    >
+                                        Elimină
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex gap-2">
+                                    <div className="flex-1 relative">
+                                        <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Introdu codul de reducere"
+                                            value={discountCode}
+                                            onChange={(e) => {
+                                                setDiscountCode(e.target.value.toUpperCase());
+                                                setDiscountError('');
+                                            }}
+                                            className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-christmas-red focus:border-transparent"
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleApplyDiscount}
+                                        disabled={isApplyingDiscount}
+                                        className="px-6 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isApplyingDiscount ? '...' : 'Aplică'}
+                                    </button>
+                                </div>
+                            )}
+                            {discountError && (
+                                <p className="mt-2 text-sm text-red-500">{discountError}</p>
+                            )}
+                        </div>
+
                         {/* Pay Button */}
                         <CTAButton
                             size="lg"
@@ -170,14 +275,14 @@ export function Step2Payment() {
                             isLoading={isProcessing}
                             icon={<Lock className="w-5 h-5" />}
                         >
-                            Plătește 89 Lei Securizat
+                            Plătește {totalPrice} Lei Securizat
                         </CTAButton>
 
                         {/* Back Link */}
-                        <Link href="/wizard/step1">
+                        <Link href="/wizard/step2">
                             <button className="w-full flex items-center justify-center gap-2 py-3 text-gray-600 hover:text-christmas-red transition-colors">
                                 <ArrowLeft className="w-4 h-4" />
-                                Înapoi la Detalii
+                                Înapoi la Facturare
                             </button>
                         </Link>
 

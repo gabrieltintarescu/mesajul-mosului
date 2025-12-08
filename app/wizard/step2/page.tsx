@@ -1,6 +1,6 @@
 'use client';
 
-import { Step2Payment, StepWizard } from '@/components/wizard';
+import { Step2Invoicing, StepWizard } from '@/components/wizard';
 import { useWizardStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -18,7 +18,7 @@ export default function WizardStep2Page() {
 
     return (
         <StepWizard currentStep={2}>
-            <Step2Payment />
+            <Step2Invoicing />
         </StepWizard>
     );
 }

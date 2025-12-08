@@ -13,6 +13,7 @@ interface StepWizardProps {
 
 const steps = [
     { title: 'Detalii Copil', description: 'Spune-ne despre copilul tău' },
+    { title: 'Facturare', description: 'Detalii pentru factură' },
     { title: 'Plată', description: 'Checkout securizat' },
 ];
 
@@ -54,7 +55,7 @@ export function StepWizard({ currentStep, children }: StepWizardProps) {
                 </div>
 
                 <div className="container mx-auto px-4 relative z-10">
-                    <StepNavigation currentStep={currentStep} totalSteps={2} steps={steps} />
+                    <StepNavigation currentStep={currentStep} totalSteps={3} steps={steps} />
 
                     <AnimatePresence mode="wait">
                         <motion.div

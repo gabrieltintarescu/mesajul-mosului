@@ -19,6 +19,24 @@ export interface ChildDetails {
     behavior: 'nice' | 'naughty' | 'mostly_nice';
 }
 
+// Invoicing Details for Wizard Step 2
+export interface InvoicingDetails {
+    invoiceType: 'individual' | 'business';
+    name: string;
+    // Individual fields
+    cnp?: string;
+    // Business fields
+    companyName?: string;
+    cui?: string;
+    regCom?: string;
+    // Common fields
+    address: string;
+    city: string;
+    county: string;
+    postalCode: string;
+    phone: string;
+}
+
 // Order Types
 export interface Order {
     id: string;
@@ -40,6 +58,7 @@ export interface ApiResponse<T> {
 
 export interface InitiateOrderPayload {
     childDetails: ChildDetails;
+    invoicingDetails?: InvoicingDetails;
     email: string;
 }
 
@@ -77,6 +96,7 @@ export interface AdminUpdateStatusPayload {
 export interface WizardState {
     step: number;
     childDetails: Partial<ChildDetails>;
+    invoicingDetails: Partial<InvoicingDetails>;
     email: string;
     orderId: string | null;
 }
