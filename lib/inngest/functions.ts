@@ -360,6 +360,19 @@ export const paymentCompletedEmail = inngest.createFunction(
                     const { data } = supabaseAdmin.storage.from('videos').getPublicUrl(fileName);
                     invoiceUrl = data.publicUrl;
 
+                    // Save invoice URL to database
+                    const { error: updateError } = await supabaseAdmin
+                        .from('orders')
+                        .update({ invoice_url: invoiceUrl })
+                        .eq('id', order.id);
+
+                    if (updateError) {
+                        console.error('Failed to save invoice URL to database:', updateError);
+                        Sentry.captureException(updateError, {
+                            extra: { orderId, context: 'Failed to save invoice URL to database' },
+                        });
+                    }
+
                     Sentry.addBreadcrumb({
                         category: 'invoice',
                         message: `Invoice PDF uploaded to ${invoiceUrl}`,

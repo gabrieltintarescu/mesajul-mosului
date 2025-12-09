@@ -25,7 +25,7 @@ export async function GET(request: Request) {
         const sortBy = searchParams.get('sortBy') || 'created_at';
         const sortOrder = searchParams.get('sortOrder') || 'desc';
 
-        // Build query
+        // Build base query
         let query = supabaseAdmin
             .from('orders')
             .select('*', { count: 'exact' });
@@ -43,32 +43,61 @@ export async function GET(request: Request) {
             query = query.lte('created_at', endDate);
         }
 
-        // Apply search - search in ID, email, and child name
-        if (searchQuery) {
-            // Use ilike for case-insensitive search on email
-            // For ID and child_details.name, we need different approach
-            query = query.or(
-                `id.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%,child_details->>name.ilike.%${searchQuery}%`
-            );
-        }
-
         // Apply sorting
         const ascending = sortOrder === 'asc';
         query = query.order(sortBy, { ascending });
 
-        // Paginate
-        const from = (page - 1) * pageSize;
-        const to = from + pageSize - 1;
-        query = query.range(from, to);
+        // For search, we need a different approach since Supabase doesn't support 
+        // JSONB field search well in .or() filters
+        let orders;
+        let totalCount;
 
-        const { data: orders, error, count } = await query;
+        if (searchQuery) {
+            // When searching, fetch all orders matching filters and search server-side
+            // This is simpler and more reliable for small-medium datasets
+            const { data: allOrders, error } = await query;
 
-        if (error) {
-            console.error('Error fetching orders:', error);
-            return NextResponse.json(
-                { success: false, error: 'Failed to fetch orders' },
-                { status: 500 }
-            );
+            if (error) {
+                console.error('Error fetching orders:', error);
+                return NextResponse.json(
+                    { success: false, error: 'Failed to fetch orders' },
+                    { status: 500 }
+                );
+            }
+
+            // Filter by search query (id, email, or child name)
+            const searchLower = searchQuery.toLowerCase();
+            const filteredOrders = allOrders?.filter(order => {
+                const idMatch = order.id.toLowerCase().includes(searchLower);
+                const emailMatch = order.email.toLowerCase().includes(searchLower);
+                const childName = order.child_details?.name?.toLowerCase() || '';
+                const nameMatch = childName.includes(searchLower);
+                return idMatch || emailMatch || nameMatch;
+            }) || [];
+
+            totalCount = filteredOrders.length;
+
+            // Apply pagination to filtered results
+            const from = (page - 1) * pageSize;
+            orders = filteredOrders.slice(from, from + pageSize);
+        } else {
+            // No search - use database pagination
+            const from = (page - 1) * pageSize;
+            const to = from + pageSize - 1;
+            query = query.range(from, to);
+
+            const { data, error, count } = await query;
+
+            if (error) {
+                console.error('Error fetching orders:', error);
+                return NextResponse.json(
+                    { success: false, error: 'Failed to fetch orders' },
+                    { status: 500 }
+                );
+            }
+
+            orders = data;
+            totalCount = count || 0;
         }
 
         // Transform orders for frontend - include all details
@@ -79,6 +108,7 @@ export async function GET(request: Request) {
             invoicingDetails: order.invoicing_details,
             status: order.status,
             videoUrl: order.video_url,
+            invoiceUrl: order.invoice_url,
             script: order.script,
             createdAt: order.created_at,
             updatedAt: order.updated_at,
@@ -109,7 +139,7 @@ export async function GET(request: Request) {
             success: true,
             data: {
                 orders: transformedOrders,
-                total: count || 0,
+                total: totalCount,
                 page,
                 pageSize,
                 stats,

@@ -44,6 +44,7 @@ export interface OrderRow {
     invoicing_details: InvoicingDetails | null;
     status: OrderStatus;
     video_url: string | null;
+    invoice_url: string | null;
     script: string | null;
     heygen_video_id: string | null;
     stripe_payment_intent_id: string | null;
@@ -63,6 +64,7 @@ export interface OrderInsert {
     invoicing_details?: InvoicingDetails | null;
     status?: OrderStatus;
     video_url?: string | null;
+    invoice_url?: string | null;
     script?: string | null;
     heygen_video_id?: string | null;
     stripe_payment_intent_id?: string | null;
@@ -82,6 +84,7 @@ export interface OrderUpdate {
     invoicing_details?: InvoicingDetails | null;
     status?: OrderStatus;
     video_url?: string | null;
+    invoice_url?: string | null;
     script?: string | null;
     heygen_video_id?: string | null;
     stripe_payment_intent_id?: string | null;

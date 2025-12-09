@@ -405,8 +405,8 @@ export default function AdminDashboardPage() {
                                     <button
                                         onClick={() => setShowDatePicker(!showDatePicker)}
                                         className={`flex items-center gap-2 px-3 py-2.5 border rounded-lg text-sm transition-colors ${dateRange.start || dateRange.end
-                                                ? 'border-christmas-gold bg-christmas-gold/5 text-christmas-red'
-                                                : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                                            ? 'border-christmas-gold bg-christmas-gold/5 text-christmas-red'
+                                            : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                                             }`}
                                     >
                                         <Calendar className="w-4 h-4" />
@@ -610,8 +610,8 @@ export default function AdminDashboardPage() {
                                                 key={pageNum}
                                                 onClick={() => setPage(pageNum)}
                                                 className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${page === pageNum
-                                                        ? 'bg-christmas-red text-white'
-                                                        : 'text-gray-600 hover:bg-gray-100'
+                                                    ? 'bg-christmas-red text-white'
+                                                    : 'text-gray-600 hover:bg-gray-100'
                                                     }`}
                                             >
                                                 {pageNum}
@@ -752,8 +752,8 @@ function OrderRow({
                         <button
                             onClick={onToggleExpand}
                             className={`p-2 rounded-lg transition-colors ${isExpanded
-                                    ? 'bg-blue-100 text-blue-600'
-                                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                                ? 'bg-blue-100 text-blue-600'
+                                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
                                 }`}
                             title="Detalii"
                         >
@@ -762,14 +762,26 @@ function OrderRow({
 
                         {/* Download Invoice */}
                         {order.status !== 'pending_payment' && (
-                            <button
-                                onClick={onDownloadInvoice}
-                                disabled={isDownloading}
-                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-                                title="Descarcă Factura"
-                            >
-                                <FileText className={`w-4 h-4 ${isDownloading ? 'animate-pulse' : ''}`} />
-                            </button>
+                            order.invoiceUrl ? (
+                                <a
+                                    href={order.invoiceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Descarcă Factura (din stocare)"
+                                >
+                                    <FileText className="w-4 h-4" />
+                                </a>
+                            ) : (
+                                <button
+                                    onClick={onDownloadInvoice}
+                                    disabled={isDownloading}
+                                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                                    title="Generează și Descarcă Factura"
+                                >
+                                    <FileText className={`w-4 h-4 ${isDownloading ? 'animate-pulse' : ''}`} />
+                                </button>
+                            )
                         )}
 
                         {/* Download Video */}
@@ -901,6 +913,21 @@ function OrderRow({
                                                 <div className="flex justify-between">
                                                     <dt className="text-gray-500">Cod Cupon:</dt>
                                                     <dd className="font-medium text-green-600">{order.couponCode}</dd>
+                                                </div>
+                                            )}
+                                            {order.invoiceUrl && (
+                                                <div className="flex justify-between">
+                                                    <dt className="text-gray-500">Factură:</dt>
+                                                    <dd>
+                                                        <a
+                                                            href={order.invoiceUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-blue-600 hover:underline text-xs"
+                                                        >
+                                                            Deschide PDF
+                                                        </a>
+                                                    </dd>
                                                 </div>
                                             )}
                                             {order.errorMessage && (

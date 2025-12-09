@@ -45,6 +45,7 @@ export interface Order {
     invoicingDetails?: InvoicingDetails;
     status: OrderStatus;
     videoUrl?: string;
+    invoiceUrl?: string;
     script?: string;
     createdAt: string;
     updatedAt: string;
