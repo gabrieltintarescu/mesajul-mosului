@@ -335,9 +335,37 @@ export const paymentCompletedEmail = inngest.createFunction(
         // (Buffer cannot be serialized between steps)
         const result = await step.run('generate-invoice-and-send-email', async () => {
             let invoicePdf: Buffer | undefined;
+            let invoiceUrl: string | undefined;
+            const invoiceNumber = `INV-${order.id.slice(0, 8).toUpperCase()}`;
 
             try {
                 invoicePdf = await generateInvoicePdf(order);
+
+                // Upload invoice PDF to Supabase storage (same folder as video)
+                const fileName = `orders/${order.id}/factura-${invoiceNumber}.pdf`;
+                const { error: uploadError } = await supabaseAdmin.storage
+                    .from('videos')
+                    .upload(fileName, invoicePdf, {
+                        contentType: 'application/pdf',
+                        upsert: true,
+                    });
+
+                if (uploadError) {
+                    Sentry.captureException(uploadError, {
+                        extra: { orderId, context: 'Failed to upload invoice PDF to storage' },
+                    });
+                    console.error('Failed to upload invoice PDF:', uploadError);
+                } else {
+                    // Get public URL
+                    const { data } = supabaseAdmin.storage.from('videos').getPublicUrl(fileName);
+                    invoiceUrl = data.publicUrl;
+
+                    Sentry.addBreadcrumb({
+                        category: 'invoice',
+                        message: `Invoice PDF uploaded to ${invoiceUrl}`,
+                        level: 'info',
+                    });
+                }
             } catch (error) {
                 Sentry.captureException(error, {
                     extra: { orderId, context: 'Failed to generate invoice PDF' },
@@ -359,7 +387,7 @@ export const paymentCompletedEmail = inngest.createFunction(
                 level: 'info',
             });
 
-            return { emailSent: true, invoiceGenerated: !!invoicePdf };
+            return { emailSent: true, invoiceGenerated: !!invoicePdf, invoiceUrl };
         });
 
         return { success: true, ...result };
