@@ -192,7 +192,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
-              <Link href="/wizard/step1">
+              <Link href="/comanda/pas-1">
                 <CTAButton
                   size="lg"
                   icon={<Sparkles className="w-5 h-5" />}
@@ -333,7 +333,7 @@ export default function Home() {
               <p className="text-base md:text-xl text-white/80 mb-6 md:mb-8 leading-relaxed">
                 Imaginează-ți chipul copilului tău când Moș Crăciun îi spune pe nume și vorbește despre realizările lui.
               </p>
-              <Link href="/wizard/step1" className="inline-block">
+              <Link href="/comanda/pas-1" className="inline-block">
                 <CTAButton icon={<ArrowRight className="w-4 h-4" />}>
                   Creează Videoclipul Acum
                 </CTAButton>
@@ -428,7 +428,7 @@ export default function Home() {
 
           {/* CTA */}
           <MotionFadeIn className="text-center mt-16">
-            <Link href="/wizard/step1">
+            <Link href="/comanda/pas-1">
               <CTAButton size="lg" icon={<ArrowRight className="w-5 h-5" />}>
                 Începe Acum
               </CTAButton>
@@ -476,7 +476,7 @@ export default function Home() {
 
           {/* CTA Button */}
           <MotionFadeIn className="text-center mt-12">
-            <Link href="/wizard/step1">
+            <Link href="/comanda/pas-1">
               <CTAButton size="lg" icon={<Sparkles className="w-5 h-5" />}>
                 Creează Propriul Tău Video
               </CTAButton>
@@ -602,7 +602,7 @@ export default function Home() {
               <p className="text-xl text-white/80 mb-10">
                 Creează un mesaj video personalizat de la Moș Crăciun pe care copilul tău îl va prețui pentru totdeauna.
               </p>
-              <Link href="/wizard/step1">
+              <Link href="/comanda/pas-1">
                 <CTAButton
                   size="lg"
                   className="!bg-transparent !border-2 !border-white !text-white !shadow-none hover:!bg-white/20 hover:!text-white"

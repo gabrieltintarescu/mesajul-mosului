@@ -291,7 +291,7 @@ When `HEYGEN_TEMPLATE_ID` is set, the system automatically uses the template (wi
    - HeyGen creates video with Santa avatar
    - Video uploaded to Supabase Storage
    - Email sent with video link
-5. **User can check status** at `/order/[id]?email=their@email.com`
+5. **User can check status** at `/status-comanda/[id]?email=their@email.com`
 
 ---
 

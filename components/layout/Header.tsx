@@ -90,7 +90,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
 
                     {/* CTA Button */}
                     <div className="hidden md:block">
-                        <Link href="/wizard/step1">
+                        <Link href="/comanda/pas-1">
                             <CTAButton
                                 variant="primary"
                                 size="sm"
@@ -136,7 +136,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
                                         {link.label}
                                     </Link>
                                 ))}
-                                <Link href="/wizard/step1" onClick={() => setIsMobileMenuOpen(false)}>
+                                <Link href="/comanda/pas-1" onClick={() => setIsMobileMenuOpen(false)}>
                                     <CTAButton variant="primary" size="sm" className="w-full mt-4">
                                         Creează Video
                                     </CTAButton>

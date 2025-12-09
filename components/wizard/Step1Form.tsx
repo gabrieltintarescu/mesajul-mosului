@@ -59,7 +59,7 @@ export function Step1Form() {
 
         // Store is already updated via onChange handlers
         // Navigate to step 2 for invoicing details
-        router.push('/wizard/step2');
+        router.push('/comanda/pas-2');
     };
 
     return (

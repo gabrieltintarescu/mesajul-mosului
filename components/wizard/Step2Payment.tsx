@@ -126,7 +126,7 @@ export function Step2Payment() {
 
     const handlePayment = async () => {
         if (!orderId) {
-            router.push('/wizard/step2');
+            router.push('/comanda/pas-2');
             return;
         }
 
@@ -143,7 +143,7 @@ export function Step2Payment() {
             } else {
                 // Check if it's an already paid error - redirect to order page
                 if (checkoutResponse.error === 'Order has already been paid') {
-                    router.push(`/order/${orderId}?email=${encodeURIComponent(email)}`);
+                    router.push(`/status-comanda/${orderId}?email=${encodeURIComponent(email)}`);
                 } else {
                     setPaymentError(checkoutResponse.error || 'Eroare la crearea sesiunii de plată');
                     setIsProcessing(false);
@@ -345,7 +345,7 @@ export function Step2Payment() {
                         </CTAButton>
 
                         {/* Back Link */}
-                        <Link href="/wizard/step2">
+                        <Link href="/comanda/pas-2">
                             <button className="w-full flex items-center justify-center gap-2 py-3 text-gray-600 hover:text-christmas-red transition-colors">
                                 <ArrowLeft className="w-4 h-4" />
                                 Înapoi la Facturare

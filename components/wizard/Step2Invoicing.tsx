@@ -108,7 +108,7 @@ export function Step2Invoicing() {
             if (response.success && response.data) {
                 setOrderId(response.data.orderId);
                 setOrderFinalPriceCents(response.data.finalPrice);
-                router.push('/wizard/step3');
+                router.push('/comanda/pas-3');
             } else {
                 setSubmitError(response.error || 'A apărut o eroare. Te rugăm să încerci din nou.');
             }
@@ -306,7 +306,7 @@ export function Step2Invoicing() {
                     </div>
 
                     {/* Back Link */}
-                    <Link href="/wizard/step1">
+                    <Link href="/comanda/pas-1">
                         <button
                             type="button"
                             className="w-full flex items-center justify-center gap-2 py-3 text-gray-600 hover:text-christmas-red transition-colors"

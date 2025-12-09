@@ -100,7 +100,7 @@ export function PricingBox({
             </ul>
 
             {/* CTA */}
-            <Link href="/wizard/step1" className="block">
+            <Link href="/comanda/pas-1" className="block">
                 <CTAButton
                     variant={isPopular ? 'outline' : 'primary'}
                     className={`w-full ${isPopular ? 'border-white text-white hover:bg-white hover:text-christmas-red' : ''}`}

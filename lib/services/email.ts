@@ -56,7 +56,7 @@ export async function sendVideoReadyEmail({
                     Santa has recorded a very special, personalized video message just for ${childName}! 
                     Click the button below to watch this magical moment.
                 </p>
-                <a href="${appUrl}/order/${orderId}" 
+                <a href="${appUrl}/status-comanda/${orderId}" 
                    style="display: inline-block; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); 
                           color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 30px; 
                           font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(196, 30, 58, 0.4);">
@@ -128,7 +128,7 @@ export async function sendOrderConfirmationEmail({
                 <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
                     You'll receive another email when the video is ready. This usually takes just a few minutes!
                 </p>
-                <a href="${appUrl}/order/${orderId}" 
+                <a href="${appUrl}/status-comanda/${orderId}" 
                    style="display: inline-block; background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%); 
                           color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 30px; 
                           font-size: 18px; font-weight: bold;">
@@ -170,7 +170,7 @@ export async function sendPaymentLinkEmail({
 }: SendPaymentLinkEmailParams): Promise<void> {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     // Include email in URL for secure order lookup
-    const paymentUrl = `${appUrl}/wizard/step3?orderId=${orderId}&email=${encodeURIComponent(to)}`;
+    const paymentUrl = `${appUrl}/comanda/pas-3?orderId=${orderId}&email=${encodeURIComponent(to)}`;
 
     await getResend().emails.send({
         from: process.env.EMAIL_FROM || 'Moș Crăciun <mos@yourdomain.com>',
@@ -337,7 +337,7 @@ export async function sendPaymentConfirmationEmail({
     invoicePdf,
 }: SendPaymentConfirmationEmailParams): Promise<void> {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const orderUrl = `${appUrl}/order/${orderId}?email=${encodeURIComponent(to)}`;
+    const orderUrl = `${appUrl}/status-comanda/${orderId}?email=${encodeURIComponent(to)}`;
     const invoiceNumber = `INV-${orderId.slice(0, 8).toUpperCase()}`;
 
     const attachments = invoicePdf
@@ -564,7 +564,7 @@ export async function sendPaymentReminderEmail({
     hoursRemaining,
 }: SendPaymentReminderEmailParams): Promise<void> {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const paymentUrl = `${appUrl}/wizard/step3?orderId=${orderId}&email=${encodeURIComponent(to)}`;
+    const paymentUrl = `${appUrl}/comanda/pas-3?orderId=${orderId}&email=${encodeURIComponent(to)}`;
 
     await getResend().emails.send({
         from: process.env.EMAIL_FROM || 'Moș Crăciun <mos@yourdomain.com>',

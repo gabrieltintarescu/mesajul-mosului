@@ -37,7 +37,7 @@ function WizardStep3Content() {
                         // Check if order is still pending payment
                         if (order.status !== 'pending_payment') {
                             // Order already paid or processed, redirect to order page
-                            router.push(`/order/${urlOrderId}`);
+                            router.push(`/status-comanda/${urlOrderId}`);
                             return;
                         }
 
@@ -65,7 +65,7 @@ function WizardStep3Content() {
                 setIsLoading(false);
             } else {
                 // No order in URL or store, redirect to step 1
-                router.push('/wizard/step1');
+                router.push('/comanda/pas-1');
             }
         }
 
@@ -92,7 +92,7 @@ function WizardStep3Content() {
                     <div className="text-center">
                         <p className="text-red-400 text-lg mb-4">{error}</p>
                         <button
-                            onClick={() => router.push('/wizard/step1')}
+                            onClick={() => router.push('/comanda/pas-1')}
                             className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700"
                         >
                             Începe o comandă nouă

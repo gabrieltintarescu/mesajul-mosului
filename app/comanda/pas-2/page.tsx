@@ -21,7 +21,7 @@ export default function WizardStep2Page() {
 
         // Redirect to step 1 if child details are not filled
         if (!childDetails.name || !email) {
-            router.push('/wizard/step1');
+            router.push('/comanda/pas-1');
         }
     }, [isHydrated, childDetails, email, router]);
 
