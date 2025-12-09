@@ -23,6 +23,8 @@ export const stripe = {
                 getStripe().checkout.sessions.create(params),
             retrieve: (id: string) =>
                 getStripe().checkout.sessions.retrieve(id),
+            list: (params: Stripe.Checkout.SessionListParams) =>
+                getStripe().checkout.sessions.list(params),
         }
     },
     webhooks: {

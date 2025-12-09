@@ -545,3 +545,181 @@ export async function sendPaymentConfirmationEmail({
     });
 }
 
+
+interface SendPaymentReminderEmailParams {
+    to: string;
+    childName: string;
+    orderId: string;
+    hoursRemaining: number;
+}
+
+/**
+ * Send payment reminder email in Romanian
+ * Sent before order expiration to remind user to complete payment
+ */
+export async function sendPaymentReminderEmail({
+    to,
+    childName,
+    orderId,
+    hoursRemaining,
+}: SendPaymentReminderEmailParams): Promise<void> {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const paymentUrl = `${appUrl}/wizard/step3?orderId=${orderId}&email=${encodeURIComponent(to)}`;
+
+    await getResend().emails.send({
+        from: process.env.EMAIL_FROM || 'Moș Crăciun <mos@yourdomain.com>',
+        to,
+        subject: `⏰ Comanda ta pentru ${childName} expiră în curând!`,
+        html: `
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Comanda expiră în curând</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #1a472a; font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #1a472a;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="background-color: #f59e0b; padding: 50px 40px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <p style="margin: 0; font-size: 50px; line-height: 1;">⏰</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top: 20px;">
+                                        <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">Nu uita de cadoul lui ${childName}!</h1>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top: 10px;">
+                                        <p style="margin: 0; color: #ffffff; font-size: 18px;">Comanda ta expiră în ${hoursRemaining} ore</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 50px 40px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <h2 style="margin: 0 0 25px 0; color: #1a472a; font-size: 24px; font-weight: bold;">
+                                            Moș Crăciun așteaptă să-i transmită un mesaj lui ${childName}! 🎅
+                                        </h2>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-bottom: 20px;">
+                                        <p style="margin: 0; color: #333333; font-size: 16px; line-height: 1.6;">
+                                            Dragă părinte,
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-bottom: 20px;">
+                                        <p style="margin: 0; color: #333333; font-size: 16px; line-height: 1.6;">
+                                            Ai început să creezi un videoclip personalizat de la Moș Crăciun pentru <strong>${childName}</strong>, 
+                                            dar nu ai finalizat încă plata.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-bottom: 30px;">
+                                        <p style="margin: 0; color: #333333; font-size: 16px; line-height: 1.6;">
+                                            ⚠️ <strong>Comanda ta va expira în ${hoursRemaining} ore.</strong><br>
+                                            Finalizează plata acum pentru a nu pierde datele introduse!
+                                        </p>
+                                    </td>
+                                </tr>
+                                <!-- Urgency badge -->
+                                <tr>
+                                    <td align="center" style="padding-bottom: 35px;">
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="background-color: #fef3c7; border-radius: 12px; width: 100%;">
+                                            <tr>
+                                                <td align="center" style="padding: 20px;">
+                                                    <p style="margin: 0 0 10px 0; color: #92400e; font-size: 14px;">Timp rămas pentru finalizare:</p>
+                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                                        <tr>
+                                                            <td align="center" bgcolor="#f59e0b" style="border-radius: 25px; padding: 8px 20px;">
+                                                                <span style="color: #ffffff; font-size: 14px; font-weight: bold;">⏰ ~${hoursRemaining} ore</span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <!-- Button -->
+                                <tr>
+                                    <td align="center" style="padding-bottom: 35px;">
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td align="center" bgcolor="#c41e3a" style="border-radius: 50px;">
+                                                    <a href="${paymentUrl}" target="_blank" style="display: inline-block; padding: 18px 45px; font-size: 18px; font-weight: bold; color: #ffffff; text-decoration: none; border-radius: 50px;">
+                                                        💳 Finalizează Plata Acum
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <!-- Divider -->
+                                <tr>
+                                    <td style="padding: 25px 0;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="border-top: 1px solid #eeeeee;"></td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <!-- Order ID and help -->
+                                <tr>
+                                    <td align="center">
+                                        <p style="margin: 0 0 10px 0; color: #999999; font-size: 13px;">
+                                            ID Comandă: <strong>${orderId}</strong>
+                                        </p>
+                                        <p style="margin: 0; color: #999999; font-size: 13px; line-height: 1.6;">
+                                            Dacă ai întrebări sau probleme, răspunde la acest email.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="background-color: #1a472a; padding: 35px 40px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <p style="margin: 0; color: #ffffff; font-size: 16px;">❄️ Nu rata magia Crăciunului! ❄️</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top: 10px;">
+                                        <p style="margin: 0; color: #ffd700; font-size: 13px;">Cu drag, Moș Crăciun și Spiridușii</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+        `,
+    });
+}

@@ -7,7 +7,8 @@ export type OrderStatus =
     | 'generating_video'
     | 'merging'
     | 'completed'
-    | 'failed';
+    | 'failed'
+    | 'expired';
 
 // Child Details for Wizard Step 1
 export interface ChildDetails {

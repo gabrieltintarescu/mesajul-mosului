@@ -1,4 +1,4 @@
-import { sendPaymentConfirmationEmail, sendPaymentLinkEmail, sendVideoReadyEmail } from '@/lib/services/email';
+import { sendPaymentConfirmationEmail, sendPaymentLinkEmail, sendPaymentReminderEmail, sendVideoReadyEmail } from '@/lib/services/email';
 import { createHeyGenVideo, getHeyGenVideoStatus } from '@/lib/services/heygen';
 import { generateInvoicePdf } from '@/lib/services/invoice';
 import { generateSantaScript } from '@/lib/services/openai';
@@ -131,41 +131,50 @@ export const videoGenerationJob = inngest.createFunction(
             return videoId;
         });
 
-        // Step 4: Poll for HeyGen completion (using step.sleep for efficient waiting)
-        const heygenVideoUrl = await step.run('wait-for-heygen', async () => {
-            const maxAttempts = 60; // 10 minutes with 10 second intervals
+        // Step 4: Poll for HeyGen completion using proper step.sleep() pattern
+        // This allows Inngest to properly manage retries and doesn't block execution time
+        const maxAttempts = 60; // 10 minutes with 10 second intervals
+        let heygenVideoUrl: string | null = null;
 
-            for (let attempt = 0; attempt < maxAttempts; attempt++) {
-                const status = await getHeyGenVideoStatus(heygenVideoId);
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            // Each status check is its own step, allowing proper retry on failure
+            const status = await step.run(`check-heygen-status-${attempt}`, async () => {
+                const result = await getHeyGenVideoStatus(heygenVideoId);
 
                 Sentry.addBreadcrumb({
                     category: 'video',
-                    message: `HeyGen status check ${attempt + 1}/${maxAttempts}: ${status.status}`,
+                    message: `HeyGen status check ${attempt + 1}/${maxAttempts}: ${result.status}`,
                     level: 'info',
                 });
 
-                if (status.status === 'completed' && status.videoUrl) {
-                    return status.videoUrl;
-                }
+                return result;
+            });
 
-                if (status.status === 'failed') {
-                    const error = new Error(`HeyGen video generation failed: ${status.error || 'Unknown error'}`);
-                    Sentry.captureException(error, {
-                        extra: { heygenVideoId, attempt, status },
-                    });
-                    throw error;
-                }
-
-                // Wait 10 seconds before next check
-                await new Promise(resolve => setTimeout(resolve, 10000));
+            if (status.status === 'completed' && status.videoUrl) {
+                heygenVideoUrl = status.videoUrl;
+                break;
             }
 
+            if (status.status === 'failed') {
+                const error = new Error(`HeyGen video generation failed: ${status.error || 'Unknown error'}`);
+                Sentry.captureException(error, {
+                    extra: { heygenVideoId, attempt, status },
+                });
+                throw error;
+            }
+
+            // Use step.sleep for proper waiting - this doesn't consume execution time
+            // and allows the function to be resumed correctly after sleep
+            await step.sleep(`wait-for-heygen-${attempt}`, '10s');
+        }
+
+        if (!heygenVideoUrl) {
             const error = new Error('HeyGen video generation timed out');
             Sentry.captureException(error, {
                 extra: { heygenVideoId, maxAttempts },
             });
             throw error;
-        });
+        }
 
         // Step 5: Process video with intro/outro concatenation
         const finalVideoUrl = await step.run('process-video', async () => {
@@ -357,5 +366,164 @@ export const paymentCompletedEmail = inngest.createFunction(
     }
 );
 
+/**
+ * Order expiration scheduler - triggered when order is created
+ * Schedules a reminder email and eventual expiration for unpaid orders
+ * 
+ * Timeline:
+ * - 2 hours: Send payment reminder email
+ * - 24 hours: Expire the order and clean up
+ */
+export const orderExpirationScheduler = inngest.createFunction(
+    {
+        id: 'order-expiration-scheduler',
+        name: 'Order Expiration Scheduler',
+        cancelOn: [
+            // Cancel this function if payment is completed
+            {
+                event: 'order/payment.completed',
+                match: 'data.orderId',
+            },
+        ],
+    },
+    { event: 'order/created' },
+    async ({ event, step }) => {
+        const { orderId } = event.data;
+
+        // Wait 2 hours before sending reminder
+        await step.sleep('wait-for-reminder', '2h');
+
+        // Check if order is still pending payment
+        const orderForReminder = await step.run('check-order-for-reminder', async () => {
+            const { data, error } = await supabaseAdmin
+                .from('orders')
+                .select('*')
+                .eq('id', orderId)
+                .single();
+
+            if (error || !data) {
+                return null;
+            }
+
+            return data;
+        });
+
+        // If order is no longer pending payment, we're done
+        if (!orderForReminder || orderForReminder.status !== 'pending_payment') {
+            return { skipped: true, reason: 'Order already paid or not found' };
+        }
+
+        // Send payment reminder email
+        await step.run('send-reminder-email', async () => {
+            await sendPaymentReminderEmail({
+                to: orderForReminder.email,
+                childName: orderForReminder.child_details.name,
+                orderId: orderForReminder.id,
+                hoursRemaining: 22, // 24 - 2 hours already elapsed
+            });
+
+            Sentry.addBreadcrumb({
+                category: 'email',
+                message: `Payment reminder email sent to ${orderForReminder.email}`,
+                level: 'info',
+            });
+        });
+
+        // Wait remaining 22 hours (total 24 hours from order creation)
+        await step.sleep('wait-for-expiration', '22h');
+
+        // Check again if order is still pending payment before expiring
+        const orderForExpiration = await step.run('check-order-for-expiration', async () => {
+            const { data, error } = await supabaseAdmin
+                .from('orders')
+                .select('*')
+                .eq('id', orderId)
+                .single();
+
+            if (error || !data) {
+                return null;
+            }
+
+            return data;
+        });
+
+        // If order is no longer pending payment, we're done
+        if (!orderForExpiration || orderForExpiration.status !== 'pending_payment') {
+            return { completed: true, reason: 'Order was paid before expiration' };
+        }
+
+        // Expire the order
+        await step.run('expire-order', async () => {
+            await supabaseAdmin
+                .from('orders')
+                .update({
+                    status: 'expired',
+                    error_message: 'Order expired - payment not completed within 24 hours',
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('id', orderId);
+
+            Sentry.addBreadcrumb({
+                category: 'order',
+                message: `Order ${orderId} expired due to non-payment`,
+                level: 'info',
+            });
+
+            console.log(`Order ${orderId} expired due to non-payment after 24 hours`);
+        });
+
+        return { success: true, expired: true };
+    }
+);
+
+/**
+ * Scheduled job to purge very old expired/failed orders
+ * Runs daily and removes orders older than 30 days that are in terminal states
+ * This helps keep the database clean
+ */
+export const orderCleanupJob = inngest.createFunction(
+    {
+        id: 'order-cleanup-daily',
+        name: 'Daily Order Cleanup',
+    },
+    { cron: '0 3 * * *' }, // Run at 3 AM daily
+    async ({ step }) => {
+        const result = await step.run('cleanup-old-orders', async () => {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+            // Delete expired orders older than 30 days
+            const { error, count } = await supabaseAdmin
+                .from('orders')
+                .delete()
+                .in('status', ['expired', 'failed'])
+                .lt('created_at', thirtyDaysAgo.toISOString());
+
+            if (error) {
+                Sentry.captureException(error, {
+                    extra: { context: 'Order cleanup job failed' },
+                });
+                throw error;
+            }
+
+            Sentry.addBreadcrumb({
+                category: 'cleanup',
+                message: `Cleaned up ${count || 0} old orders`,
+                level: 'info',
+            });
+
+            return { deletedCount: count || 0 };
+        });
+
+        return { success: true, ...result };
+    }
+);
+
 // Export all functions for the Inngest handler
-export const functions = [videoGenerationJob, paymentLinkEmail, paymentCompletedEmail];
+export const functions = [
+    videoGenerationJob, 
+    paymentLinkEmail, 
+    paymentCompletedEmail, 
+    orderExpirationScheduler,
+    orderCleanupJob,
+];

@@ -98,14 +98,18 @@ export async function POST(request: Request) {
             validCouponCode = coupon.code;
         }
 
+        // Determine if this is a free order (100% discount)
+        const isFreeOrder = finalPrice === 0;
+
         // Create order in database
+        // For free orders, set status to 'paid' immediately since no payment is needed
         const { data: order, error: orderError } = await supabaseAdmin
             .from('orders')
             .insert({
                 email: body.email,
                 child_details: body.childDetails,
                 invoicing_details: body.invoicingDetails || null,
-                status: 'pending_payment',
+                status: isFreeOrder ? 'paid' : 'pending_payment',
                 coupon_code: validCouponCode,
                 discount_amount: discountAmount,
                 final_price: finalPrice,
@@ -130,14 +134,42 @@ export async function POST(request: Request) {
             category: 'order',
             message: `Order created: ${order.id}`,
             level: 'info',
-            data: { email: body.email, finalPrice },
+            data: { email: body.email, finalPrice, isFreeOrder },
         });
 
-        // Trigger abandoned cart reminder (will be cancelled if payment completes)
-        await inngest.send({
-            name: 'order/created',
-            data: { orderId: order.id },
-        });
+        // For free orders: increment coupon usage and trigger video generation immediately
+        if (isFreeOrder) {
+            // Increment coupon usage since it was 100% off
+            if (validCouponCode) {
+                await supabaseAdmin.rpc('increment_coupon_usage', {
+                    coupon_code: validCouponCode,
+                });
+            }
+
+            // Trigger video generation immediately for free orders
+            await inngest.send({
+                name: 'video/generate.requested',
+                data: { orderId: order.id },
+            });
+
+            // Send payment confirmation email (even for free orders)
+            await inngest.send({
+                name: 'order/payment.completed',
+                data: { orderId: order.id },
+            });
+
+            Sentry.addBreadcrumb({
+                category: 'order',
+                message: `Free order ${order.id} - video generation triggered immediately`,
+                level: 'info',
+            });
+        } else {
+            // Trigger abandoned cart reminder (will be cancelled if payment completes)
+            await inngest.send({
+                name: 'order/created',
+                data: { orderId: order.id },
+            });
+        }
 
         return NextResponse.json({
             success: true,
@@ -145,6 +177,7 @@ export async function POST(request: Request) {
                 orderId: order.id,
                 finalPrice,
                 discountAmount,
+                isFreeOrder,
             },
         });
     } catch (error) {

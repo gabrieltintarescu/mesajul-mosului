@@ -118,6 +118,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         return;
     }
 
+    // Idempotency check: if order is not pending_payment, it was already processed
+    // This prevents duplicate video generation, coupon increments, and emails on webhook retries
+    if (order.status !== 'pending_payment') {
+        console.log(`Order ${orderId} already processed (status: ${order.status}), skipping webhook`);
+        Sentry.addBreadcrumb({
+            category: 'webhook',
+            message: `Duplicate webhook skipped for order ${orderId}`,
+            level: 'info',
+            data: { currentStatus: order.status },
+        });
+        return;
+    }
+
     // Update order status to paid
     const { error: updateError } = await supabaseAdmin
         .from('orders')
@@ -165,9 +178,46 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 }
 
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-    const orderId = paymentIntent.metadata?.orderId;
+    // Note: paymentIntent.metadata may not contain orderId since we set metadata on checkout session
+    // We need to look up the order by the payment intent ID stored during checkout completion
+    // Or look up by finding the checkout session that created this payment intent
+    
+    let orderId = paymentIntent.metadata?.orderId;
+
+    // If no orderId in payment intent metadata, try to find order by payment intent ID
+    // (in case the checkout was completed but payment still failed later)
+    if (!orderId) {
+        const { data: order } = await supabaseAdmin
+            .from('orders')
+            .select('id')
+            .eq('stripe_payment_intent_id', paymentIntent.id)
+            .single();
+        
+        if (order) {
+            orderId = order.id;
+        }
+    }
+
+    // If still no orderId, try to find order by looking up the checkout session
+    if (!orderId) {
+        try {
+            // List checkout sessions that have this payment intent
+            const sessions = await stripe.checkout.sessions.list({
+                payment_intent: paymentIntent.id,
+                limit: 1,
+            });
+            
+            if (sessions.data.length > 0 && sessions.data[0].metadata?.orderId) {
+                orderId = sessions.data[0].metadata.orderId;
+            }
+        } catch (error) {
+            console.error('Failed to lookup checkout session for payment intent:', error);
+        }
+    }
 
     if (!orderId) {
+        // Can't find the order - log and return
+        console.log(`Payment failed but could not find associated order for payment intent: ${paymentIntent.id}`);
         return;
     }
 
@@ -176,6 +226,8 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
         extra: { orderId, paymentIntentId: paymentIntent.id },
     });
 
+    // Only update if order is still in pending_payment status
+    // (don't overwrite a paid or processing order if webhook arrives late)
     await supabaseAdmin
         .from('orders')
         .update({
@@ -183,5 +235,6 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
             error_message: 'Payment failed',
             updated_at: new Date().toISOString(),
         })
-        .eq('id', orderId);
+        .eq('id', orderId)
+        .eq('status', 'pending_payment');
 }

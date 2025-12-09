@@ -48,6 +48,11 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; bgColor:
         color: 'text-red-700',
         bgColor: 'bg-red-100',
     },
+    expired: {
+        label: 'Expirat',
+        color: 'text-gray-700',
+        bgColor: 'bg-gray-100',
+    },
 };
 
 export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
@@ -67,7 +72,7 @@ export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
       `}
         >
             <span className="relative flex h-2 w-2">
-                {status !== 'completed' && status !== 'failed' && status !== 'pending_payment' && (
+                {status !== 'completed' && status !== 'failed' && status !== 'pending_payment' && status !== 'expired' && (
                     <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${config.bgColor} opacity-75`}></span>
                 )}
                 <span className={`relative inline-flex rounded-full h-2 w-2 ${config.color.replace('text-', 'bg-')}`}></span>

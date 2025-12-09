@@ -6,7 +6,8 @@ export type OrderStatus =
     | 'generating_video'
     | 'merging'
     | 'completed'
-    | 'failed';
+    | 'failed'
+    | 'expired';
 
 export type InvoiceType = 'individual' | 'business';
 export type ChildGender = 'boy' | 'girl';
