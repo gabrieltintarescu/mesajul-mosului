@@ -279,14 +279,44 @@ export async function createCheckoutSession(
 }
 
 /**
+ * Helper to get admin token from localStorage
+ */
+function getAdminToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        const storage = localStorage.getItem('santa-admin-storage');
+        if (storage) {
+            const parsed = JSON.parse(storage);
+            return parsed.state?.token || null;
+        }
+    } catch {
+        return null;
+    }
+    return null;
+}
+
+/**
  * Admin: Get all orders with pagination
  */
 export async function adminGetOrders(
     page: number = 1,
-    pageSize: number = 10,
-    statusFilter?: OrderStatus
+    pageSize: number = 20,
+    statusFilter?: OrderStatus,
+    search?: string,
+    startDate?: string,
+    endDate?: string,
+    sortBy?: string,
+    sortOrder?: 'asc' | 'desc'
 ): Promise<ApiResponse<AdminOrdersResponse>> {
     try {
+        const token = getAdminToken();
+        if (!token) {
+            return {
+                success: false,
+                error: 'Not authenticated',
+            };
+        }
+
         const params = new URLSearchParams({
             page: String(page),
             pageSize: String(pageSize),
@@ -294,8 +324,27 @@ export async function adminGetOrders(
         if (statusFilter) {
             params.append('status', statusFilter);
         }
+        if (search) {
+            params.append('search', search);
+        }
+        if (startDate) {
+            params.append('startDate', startDate);
+        }
+        if (endDate) {
+            params.append('endDate', endDate);
+        }
+        if (sortBy) {
+            params.append('sortBy', sortBy);
+        }
+        if (sortOrder) {
+            params.append('sortOrder', sortOrder);
+        }
 
-        const response = await fetch(`/api/admin/orders?${params.toString()}`);
+        const response = await fetch(`/api/admin/orders?${params.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
         const result = await response.json();
 
         if (!response.ok) {
@@ -325,10 +374,19 @@ export async function adminUpdateOrderStatus(
     payload: AdminUpdateStatusPayload
 ): Promise<ApiResponse<{ order: Order }>> {
     try {
+        const token = getAdminToken();
+        if (!token) {
+            return {
+                success: false,
+                error: 'Not authenticated',
+            };
+        }
+
         const response = await fetch(`/api/admin/orders/${payload.orderId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify({ status: payload.status }),
         });

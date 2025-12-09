@@ -45,14 +45,17 @@ export interface Order {
     invoicingDetails?: InvoicingDetails;
     status: OrderStatus;
     videoUrl?: string;
+    script?: string;
     createdAt: string;
     updatedAt: string;
     email: string;
     paymentIntentId?: string;
+    checkoutSessionId?: string;
     // Pricing fields
-    final_price: number;
-    discount_amount?: number;
-    coupon_code?: string | null;
+    finalPrice: number;
+    discountAmount?: number;
+    couponCode?: string | null;
+    errorMessage?: string | null;
 }
 
 // API Response Types
@@ -91,6 +94,13 @@ export interface AdminOrdersResponse {
     total: number;
     page: number;
     pageSize: number;
+    stats: {
+        total: number;
+        completed: number;
+        pending: number;
+        failed: number;
+        revenue: number;
+    };
 }
 
 export interface AdminUpdateStatusPayload {

@@ -41,9 +41,9 @@ export function Step2Payment() {
                 if (response.success && response.data?.order) {
                     const order = response.data.order;
                     setOrderPricing({
-                        finalPriceCents: order.final_price,
-                        discountAmountCents: order.discount_amount || 0,
-                        couponCode: order.coupon_code ?? null,
+                        finalPriceCents: order.finalPrice,
+                        discountAmountCents: order.discountAmount || 0,
+                        couponCode: order.couponCode ?? null,
                     });
                 }
             } catch (error) {
