@@ -8,7 +8,7 @@ import { Suspense, useEffect, useState } from 'react';
 function WizardStep3Content() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { orderId: storeOrderId, childDetails, setOrderId, setChildDetails } = useWizardStore();
+    const { orderId: storeOrderId, childDetails, setOrderId, setChildDetails, setEmail, setOrderFinalPriceCents } = useWizardStore();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -41,8 +41,12 @@ function WizardStep3Content() {
                             return;
                         }
 
-                        // Restore order data to store
+                        // Restore order data to store (including email for payment step)
                         setOrderId(order.id);
+                        setEmail(urlEmail);  // Set email from URL so Step2Payment can use it
+                        if (order.final_price) {
+                            setOrderFinalPriceCents(order.final_price);
+                        }
                         if (order.childDetails) {
                             setChildDetails(order.childDetails);
                         }
@@ -66,7 +70,7 @@ function WizardStep3Content() {
         }
 
         loadOrder();
-    }, [urlOrderId, urlEmail, storeOrderId, childDetails.name, router, setOrderId, setChildDetails]);
+    }, [urlOrderId, urlEmail, storeOrderId, childDetails.name, router, setOrderId, setChildDetails, setEmail, setOrderFinalPriceCents]);
 
     if (isLoading) {
         return (
