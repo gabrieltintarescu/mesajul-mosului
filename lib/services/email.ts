@@ -23,58 +23,175 @@ export async function sendVideoReadyEmail({
     orderId,
 }: SendVideoEmailParams): Promise<void> {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const orderUrl = `${appUrl}/status-comanda/${orderId}?email=${encodeURIComponent(to)}`;
 
     await getResend().emails.send({
-        from: process.env.EMAIL_FROM || 'Santa Claus <santa@yourdomain.com>',
+        from: process.env.EMAIL_FROM || 'Moș Crăciun <mos@yourdomain.com>',
         to,
-        subject: `🎅 Santa's Special Video for ${childName} is Ready!`,
+        subject: `🎅 Videoclipul pentru ${childName} este gata!`,
         html: `
 <!DOCTYPE html>
-<html>
+<html lang="ro">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Videoclipul este gata</title>
+    <!--[if mso]>
+    <style type="text/css">
+        body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
+    </style>
+    <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; background-color: #1a472a; font-family: 'Georgia', serif;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+<body style="margin: 0; padding: 0; background-color: #1a472a; font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased;">
+    <!-- Outer wrapper -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #1a472a;">
         <tr>
-            <td style="background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); padding: 40px; text-align: center;">
-                <h1 style="color: #ffffff; margin: 0; font-size: 28px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
-                    🎄 Ho Ho Ho! 🎄
-                </h1>
-                <p style="color: #ffd700; margin-top: 10px; font-size: 18px;">
-                    A Special Message from Santa Claus
-                </p>
-            </td>
-        </tr>
-        <tr>
-            <td style="padding: 40px; text-align: center;">
-                <h2 style="color: #1a472a; margin: 0 0 20px 0; font-size: 24px;">
-                    ${childName}'s Video is Ready! 🎁
-                </h2>
-                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
-                    Santa has recorded a very special, personalized video message just for ${childName}! 
-                    Click the button below to watch this magical moment.
-                </p>
-                <a href="${appUrl}/status-comanda/${orderId}" 
-                   style="display: inline-block; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); 
-                          color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 30px; 
-                          font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(196, 30, 58, 0.4);">
-                    🎬 Watch Santa's Video
-                </a>
-                <p style="color: #666666; font-size: 14px; margin-top: 30px;">
-                    This video was created with love from the North Pole specially for your family.
-                </p>
-            </td>
-        </tr>
-        <tr>
-            <td style="background-color: #1a472a; padding: 30px; text-align: center;">
-                <p style="color: #ffffff; margin: 0; font-size: 14px;">
-                    ❄️ Merry Christmas! ❄️
-                </p>
-                <p style="color: #ffd700; margin: 10px 0 0 0; font-size: 12px;">
-                    With love from Santa Claus & the Elves
-                </p>
+            <td align="center" style="padding: 40px 20px;">
+                <!-- Main container -->
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="background-color: #c41e3a; padding: 50px 40px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <p style="margin: 0; font-size: 50px; line-height: 1;">🎬</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top: 20px;">
+                                        <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">Ho Ho Ho!</h1>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top: 10px;">
+                                        <p style="margin: 0; color: #ffd700; font-size: 18px;">Videoclipul tău este gata!</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 50px 40px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <!-- Success icon -->
+                                <tr>
+                                    <td align="center" style="padding-bottom: 25px;">
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td align="center" style="background-color: #dcfce7; border-radius: 50%; width: 80px; height: 80px; text-align: center; vertical-align: middle;">
+                                                    <span style="font-size: 40px; line-height: 80px;">🎁</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <h2 style="margin: 0 0 25px 0; color: #1a472a; font-size: 24px; font-weight: bold;">
+                                            Videoclipul pentru ${childName} este gata!
+                                        </h2>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-bottom: 20px;">
+                                        <p style="margin: 0; color: #333333; font-size: 16px; line-height: 1.6;">
+                                            Dragă părinte,
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-bottom: 20px;">
+                                        <p style="margin: 0; color: #333333; font-size: 16px; line-height: 1.6;">
+                                            Moș Crăciun a înregistrat un mesaj video special și personalizat<br>
+                                            pentru <strong>${childName}</strong>! 🎄
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-bottom: 30px;">
+                                        <p style="margin: 0; color: #333333; font-size: 16px; line-height: 1.6;">
+                                            Apasă butonul de mai jos pentru a vedea acest moment magic!
+                                        </p>
+                                    </td>
+                                </tr>
+                                <!-- Button -->
+                                <tr>
+                                    <td align="center" style="padding-bottom: 35px;">
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td align="center" bgcolor="#c41e3a" style="border-radius: 50px;">
+                                                    <a href="${orderUrl}" target="_blank" style="display: inline-block; padding: 18px 45px; font-size: 18px; font-weight: bold; color: #ffffff; text-decoration: none; border-radius: 50px;">
+                                                        🎬 Vezi Videoclipul
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <!-- Status badge -->
+                                <tr>
+                                    <td align="center" style="padding-bottom: 35px;">
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="background-color: #dcfce7; border-radius: 12px; width: 100%;">
+                                            <tr>
+                                                <td align="center" style="padding: 20px;">
+                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                                        <tr>
+                                                            <td align="center" bgcolor="#16a34a" style="border-radius: 25px; padding: 8px 20px;">
+                                                                <span style="color: #ffffff; font-size: 14px; font-weight: bold;">✅ Finalizat</span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <!-- Divider -->
+                                <tr>
+                                    <td style="padding: 25px 0;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="border-top: 1px solid #eeeeee;"></td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <!-- Footer text -->
+                                <tr>
+                                    <td align="center">
+                                        <p style="margin: 0 0 10px 0; color: #999999; font-size: 13px;">
+                                            ID Comandă: <strong>${orderId}</strong>
+                                        </p>
+                                        <p style="margin: 0; color: #999999; font-size: 13px; line-height: 1.6;">
+                                            Acest videoclip a fost creat cu drag de la Polul Nord<br>
+                                            special pentru familia ta. 🎅
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="background-color: #1a472a; padding: 35px 40px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <p style="margin: 0; color: #ffffff; font-size: 16px;">❄️ Crăciun Fericit! ❄️</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top: 10px;">
+                                        <p style="margin: 0; color: #ffd700; font-size: 13px;">Cu drag, Moș Crăciun și Spiridușii</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>
