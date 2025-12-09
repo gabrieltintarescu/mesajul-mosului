@@ -89,6 +89,7 @@ export async function createHeyGenVideoFromTemplate(script: string): Promise<str
             // The key must match the variable name in your template exactly
             // In HeyGen template editor, the variable should be named "script"
             script: {
+                type: 'text',
                 text: {
                     name: 'script',
                     value: script,
