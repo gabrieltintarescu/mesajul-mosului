@@ -32,6 +32,15 @@ export const videoGenerationJob = inngest.createFunction(
         id: 'video-generation',
         name: 'Video Generation Pipeline',
         retries: 2,
+        // Concurrency control: max 10 videos processing simultaneously
+        concurrency: {
+            limit: 10,
+        },
+        // Rate limit: max 30 new video jobs per minute to protect HeyGen API
+        rateLimit: {
+            limit: 30,
+            period: '1m',
+        },
         onFailure: async ({ error, event }) => {
             // The original event data is nested in the failure event
             const orderId = (event.data as { event?: { data?: { orderId?: string } } }).event?.data?.orderId;
