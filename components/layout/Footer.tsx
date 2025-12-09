@@ -56,12 +56,12 @@ export function Footer() {
                                 className="h-10 w-auto"
                             />
                             <span className="font-bold text-2xl font-christmas">
-                                Santa<span className="text-christmas-gold">AI</span>
+                                Mesajul <span className="text-christmas-gold">Mosului</span>
                             </span>
                         </Link>
                         <p className="text-gray-400 mb-6 max-w-sm">
                             Creează mesaje video personalizate magice de la Moș Crăciun pentru cei mici.
-                            Powered by AI, făcut cu dragoste.
+                            Făcut cu dragoste.
                         </p>
 
                         {/* Social Links */}
@@ -122,11 +122,11 @@ export function Footer() {
                         <ul className="space-y-3">
                             <li>
                                 <a
-                                    href="mailto:hello@santaai.com"
+                                    href="mailto:contact@mesajul-mosului.ro"
                                     className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
                                 >
                                     <Mail className="w-4 h-4" />
-                                    hello@santaai.com
+                                    contact@mesajul-mosului.ro
                                 </a>
                             </li>
                             <li>
@@ -146,7 +146,7 @@ export function Footer() {
                 <div className="mt-16 pt-8 border-t border-gray-800">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <p className="text-gray-500 text-sm">
-                            © {currentYear} SantaAI. Toate drepturile rezervate.
+                            © {currentYear} Mesajul Mosului. Toate drepturile rezervate.
                         </p>
                         <p className="text-gray-500 text-sm flex items-center gap-1">
                             Făcut cu <Heart className="w-4 h-4 text-christmas-red fill-current" /> pentru familii de pretutindeni

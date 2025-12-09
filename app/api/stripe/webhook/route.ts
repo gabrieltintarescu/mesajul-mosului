@@ -181,7 +181,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
     // Note: paymentIntent.metadata may not contain orderId since we set metadata on checkout session
     // We need to look up the order by the payment intent ID stored during checkout completion
     // Or look up by finding the checkout session that created this payment intent
-    
+
     let orderId = paymentIntent.metadata?.orderId;
 
     // If no orderId in payment intent metadata, try to find order by payment intent ID
@@ -192,7 +192,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
             .select('id')
             .eq('stripe_payment_intent_id', paymentIntent.id)
             .single();
-        
+
         if (order) {
             orderId = order.id;
         }
@@ -206,7 +206,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
                 payment_intent: paymentIntent.id,
                 limit: 1,
             });
-            
+
             if (sessions.data.length > 0 && sessions.data[0].metadata?.orderId) {
                 orderId = sessions.data[0].metadata.orderId;
             }

@@ -357,8 +357,8 @@ export default function OrderStatusPage() {
                         <div className="mt-8 text-center text-sm text-gray-500">
                             <p>
                                 Întrebări? Contactează-ne la{' '}
-                                <a href="mailto:hello@santaai.com" className="text-christmas-red hover:underline">
-                                    hello@santaai.com
+                                <a href="mailto:contact@mesajul-mosului.ro" className="text-christmas-red hover:underline">
+                                    contact@mesajul-mosului.ro
                                 </a>
                             </p>
                         </div>

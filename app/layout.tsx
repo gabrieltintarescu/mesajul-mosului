@@ -12,21 +12,21 @@ export const metadata: Metadata = {
   title: "Mesajul Mosului - Mesaje Video Personalizate de la Moș Crăciun",
   description: "Creează mesaje video magice, personalizate cu ajutorul AI de la Moș Crăciun pentru copilul tău. Fă acest Crăciun de neuitat cu un video în care Moșul îl strigă pe copil pe nume!",
   keywords: ["video Moș Crăciun", "mesaj personalizat Santa", "cadou de Crăciun", "AI Moș Crăciun", "video personalizat"],
-  authors: [{ name: "SantaAI" }],
+  authors: [{ name: "Mesajul Mosului" }],
   icons: {
     icon: "/santaicon.png",
     apple: "/santaicon.png",
   },
   openGraph: {
-    title: "SantaAI - Mesaje Video Personalizate de la Moș Crăciun",
+    title: "Mesajul Mosului - Mesaje Video Personalizate de la Moș Crăciun",
     description: "Creează mesaje video magice personalizate de la Moș Crăciun pentru copilul tău",
     type: "website",
     locale: "ro_RO",
-    siteName: "SantaAI",
+    siteName: "Mesajul Mosului",
   },
   twitter: {
     card: "summary_large_image",
-    title: "SantaAI - Video Personalizat de la Moș Crăciun",
+    title: "Mesajul Mosului - Video Personalizat de la Moș Crăciun",
     description: "Creează mesaje video magice personalizate de la Moș Crăciun pentru copilul tău",
   },
   robots: {

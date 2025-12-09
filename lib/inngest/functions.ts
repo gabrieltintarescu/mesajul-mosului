@@ -521,9 +521,9 @@ export const orderCleanupJob = inngest.createFunction(
 
 // Export all functions for the Inngest handler
 export const functions = [
-    videoGenerationJob, 
-    paymentLinkEmail, 
-    paymentCompletedEmail, 
+    videoGenerationJob,
+    paymentLinkEmail,
+    paymentCompletedEmail,
     orderExpirationScheduler,
     orderCleanupJob,
 ];

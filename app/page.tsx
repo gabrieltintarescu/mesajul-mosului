@@ -251,7 +251,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
-              De ce să alegi <span className="text-christmas-red">Mesajul Moșului</span>?
+              De ce să alegi <span className="text-christmas-red">Mesajul Mosului</span>?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Combinăm tehnologia de ultimă generație cu magia Crăciunului pentru experiențe cu adevărat personalizate.
