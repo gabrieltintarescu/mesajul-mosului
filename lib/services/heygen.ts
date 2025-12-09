@@ -79,7 +79,6 @@ export async function createHeyGenVideoFromTemplate(script: string): Promise<str
     }
 
     const payload = {
-        template_id: templateId,
         title: `Santa Video - ${new Date().toISOString()}`,
         variables: {
             // The script variable - must match the variable name in your template
@@ -93,7 +92,7 @@ export async function createHeyGenVideoFromTemplate(script: string): Promise<str
         },
     };
 
-    const response = await heygenFetch<HeyGenTemplateVideoResponse>('/v2/template/generate', {
+    const response = await heygenFetch<HeyGenTemplateVideoResponse>(`/v2/template/${templateId}/generate`, {
         method: 'POST',
         body: JSON.stringify(payload),
     });
@@ -164,8 +163,8 @@ export async function createHeyGenVideo(script: string): Promise<string> {
 
     // Check for error in response
     if (response.error) {
-        const errorDetails = typeof response.error === 'string' 
-            ? response.error 
+        const errorDetails = typeof response.error === 'string'
+            ? response.error
             : response.error.message || JSON.stringify(response.error);
         throw new Error(`HeyGen video creation failed: ${errorDetails}`);
     }
