@@ -32,9 +32,9 @@ export const videoGenerationJob = inngest.createFunction(
         id: 'video-generation',
         name: 'Video Generation Pipeline',
         retries: 2,
-        // Concurrency control: max 10 videos processing simultaneously
+        // Concurrency control: max 5 videos processing simultaneously (Inngest plan limit)
         concurrency: {
-            limit: 10,
+            limit: 5,
         },
         // Rate limit: max 30 new video jobs per minute to protect HeyGen API
         rateLimit: {
