@@ -80,6 +80,11 @@ export async function createHeyGenVideoFromTemplate(script: string): Promise<str
 
     const payload = {
         title: `Santa Video - ${new Date().toISOString()}`,
+        // Force 720p resolution (Essential API plan limit)
+        dimension: {
+            width: 1280,
+            height: 720,
+        },
         variables: {
             // The script variable - must match the variable name in your template
             script: {
