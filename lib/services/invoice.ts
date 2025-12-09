@@ -14,11 +14,15 @@ export async function generateInvoicePdf(order: OrderRow): Promise<Buffer> {
         day: 'numeric',
     });
 
-    // Calculate prices (stored in cents/bani)
-    const basePrice = 12900; // 129 RON in bani
-    const holidayDiscount = 4000; // 40 RON in bani
+    // Use actual pricing from order data
+    // final_price is what the customer paid
+    // discount_amount is the coupon discount applied
+    const finalPrice = order.final_price || 0;
     const couponDiscount = order.discount_amount || 0;
-    const finalPrice = order.final_price || (basePrice - holidayDiscount - couponDiscount);
+
+    // The base price is final_price + coupon_discount (reverse calculate from actual data)
+    // This ensures the invoice matches exactly what was charged
+    const basePrice = finalPrice + couponDiscount;
 
     const formatPrice = (bani: number) => `${(bani / 100).toFixed(2)} RON`;
 
@@ -44,7 +48,7 @@ export async function generateInvoicePdf(order: OrderRow): Promise<Buffer> {
     doc.setFontSize(20);
     doc.setTextColor(...primaryColor);
     doc.setFont('helvetica', 'bold');
-    doc.text('Mesaj de la Mosu', margin, y);
+    doc.text('Mesajul Mosului', margin, y);
 
     y += 6;
     doc.setFontSize(10);
@@ -83,20 +87,20 @@ export async function generateInvoicePdf(order: OrderRow): Promise<Buffer> {
     doc.setFontSize(11);
     doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'bold');
-    doc.text('SC Mesaj de la Mosu SRL', margin, y);
+    doc.text('GTC SELECT GRUP SRL', margin, y);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     y += 5;
-    doc.text('CUI: RO12345678', margin, y);
+    doc.text('CUI: 39138255', margin, y);
     y += 5;
-    doc.text('Reg. Com.: J40/1234/2024', margin, y);
+    doc.text('Reg. Com.: J40/4601/2018', margin, y);
     y += 5;
-    doc.text('Str. Polul Nord nr. 1', margin, y);
+    doc.text('Str. Comarnic 59', margin, y);
     y += 5;
     doc.text('Bucuresti, Romania', margin, y);
     y += 5;
-    doc.text('contact@mesajdelamosu.ro', margin, y);
+    doc.text('contact@mesajul-mosului.ro', margin, y);
 
     // Customer info (right)
     const customerX = pageWidth / 2 + 10;
@@ -120,16 +124,10 @@ export async function generateInvoicePdf(order: OrderRow): Promise<Buffer> {
             doc.text(`Persoana de contact: ${invoicing.name}`, customerX, customerY);
             customerY += 5;
             doc.text(`CUI: ${invoicing.cui || 'N/A'}`, customerX, customerY);
-            if (invoicing.regCom) {
-                customerY += 5;
-                doc.text(`Reg. Com.: ${invoicing.regCom}`, customerX, customerY);
-            }
         } else {
             doc.text(invoicing.name, customerX, customerY);
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
-            customerY += 5;
-            doc.text(`CNP: ${invoicing.cnp || 'N/A'}`, customerX, customerY);
         }
         customerY += 5;
         doc.text(invoicing.address, customerX, customerY);
@@ -198,24 +196,7 @@ export async function generateInvoicePdf(order: OrderRow): Promise<Buffer> {
     doc.setDrawColor(238, 238, 238);
     doc.line(margin, y, margin + tableWidth, y);
 
-    // Row 2: Holiday discount
-    y += 8;
-    colX = margin + 3;
-    doc.setTextColor(...greenColor);
-    doc.text('Reducere de Sarbatori', colX, y);
-    doc.setTextColor(0, 0, 0);
-    colX += colWidths[0];
-    doc.text('1', colX + 5, y);
-    colX += colWidths[1];
-    doc.text(`-${formatPrice(holidayDiscount)}`, colX, y);
-    colX += colWidths[2];
-    doc.text(`-${formatPrice(holidayDiscount)}`, colX, y);
-
-    y += 6;
-    doc.setDrawColor(238, 238, 238);
-    doc.line(margin, y, margin + tableWidth, y);
-
-    // Row 3: Coupon discount (if any)
+    // Row 2: Coupon discount (if any)
     if (couponDiscount > 0) {
         y += 8;
         colX = margin + 3;
@@ -243,14 +224,12 @@ export async function generateInvoicePdf(order: OrderRow): Promise<Buffer> {
     doc.text('Subtotal:', totalsX, y);
     doc.text(formatPrice(basePrice), pageWidth - margin, y, { align: 'right' });
 
-    y += 6;
-    doc.text('Reduceri:', totalsX, y);
-    doc.text(`-${formatPrice(holidayDiscount + couponDiscount)}`, pageWidth - margin, y, { align: 'right' });
-
-    y += 6;
-    const vat = Math.round(finalPrice * 0.19 / 1.19);
-    doc.text('TVA (inclus):', totalsX, y);
-    doc.text(formatPrice(vat), pageWidth - margin, y, { align: 'right' });
+    // Show discounts only if there are any
+    if (couponDiscount > 0) {
+        y += 6;
+        doc.text('Reduceri:', totalsX, y);
+        doc.text(`-${formatPrice(couponDiscount)}`, pageWidth - margin, y, { align: 'right' });
+    }
 
     // Total line
     y += 3;
@@ -292,7 +271,7 @@ export async function generateInvoicePdf(order: OrderRow): Promise<Buffer> {
     y += 4;
     doc.text(`ID Comanda: ${order.id}`, pageWidth / 2, y, { align: 'center' });
     y += 4;
-    doc.text(`© ${new Date().getFullYear()} Mesaj de la Mosu - Toate drepturile rezervate`, pageWidth / 2, y, { align: 'center' });
+    doc.text(`© ${new Date().getFullYear()} GTC SELECT GRUP - Toate drepturile rezervate`, pageWidth / 2, y, { align: 'center' });
 
     // Convert to Buffer
     const pdfArrayBuffer = doc.output('arraybuffer');
