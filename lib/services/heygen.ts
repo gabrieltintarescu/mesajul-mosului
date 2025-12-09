@@ -38,12 +38,20 @@ async function heygenFetch<T>(endpoint: string, options: RequestInit = {}): Prom
         },
     });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HeyGen API error: ${response.status} - ${errorText}`);
+    const responseText = await response.text();
+    let responseJson: T;
+
+    try {
+        responseJson = JSON.parse(responseText);
+    } catch {
+        throw new Error(`HeyGen API error: ${response.status} - Invalid JSON response: ${responseText}`);
     }
 
-    return response.json();
+    if (!response.ok) {
+        throw new Error(`HeyGen API error: ${response.status} - ${responseText}`);
+    }
+
+    return responseJson;
 }
 
 /**
@@ -145,8 +153,16 @@ export async function createHeyGenVideo(script: string): Promise<string> {
         body: JSON.stringify(payload),
     });
 
+    // Log the full response for debugging
+    console.log('HeyGen API response:', JSON.stringify(response, null, 2));
+
     if (response.code !== 100) {
-        throw new Error(`HeyGen video creation failed: ${response.message}`);
+        const errorDetails = response.message || response.data || JSON.stringify(response);
+        throw new Error(`HeyGen video creation failed: ${errorDetails}`);
+    }
+
+    if (!response.data?.video_id) {
+        throw new Error(`HeyGen video creation failed: No video_id in response - ${JSON.stringify(response)}`);
     }
 
     return response.data.video_id;
