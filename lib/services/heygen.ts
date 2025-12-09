@@ -1,11 +1,17 @@
 const HEYGEN_API_BASE = 'https://api.heygen.com';
 
 interface HeyGenVideoResponse {
-    code: number;
-    data: {
+    code?: number;
+    data?: {
         video_id: string;
     };
-    message: string;
+    // V2 API may return video_id directly
+    video_id?: string;
+    message?: string;
+    error?: {
+        code: string;
+        message: string;
+    } | string | null;
 }
 
 interface HeyGenTemplateVideoResponse {
@@ -156,24 +162,22 @@ export async function createHeyGenVideo(script: string): Promise<string> {
     // Log the full response for debugging
     console.log('HeyGen API response:', JSON.stringify(response, null, 2));
 
-    if (response.code !== 100) {
-        // Properly stringify the error details
-        let errorDetails: string;
-        if (response.message) {
-            errorDetails = response.message;
-        } else if (response.data) {
-            errorDetails = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-        } else {
-            errorDetails = JSON.stringify(response);
-        }
+    // Check for error in response
+    if (response.error) {
+        const errorDetails = typeof response.error === 'string' 
+            ? response.error 
+            : response.error.message || JSON.stringify(response.error);
         throw new Error(`HeyGen video creation failed: ${errorDetails}`);
     }
 
-    if (!response.data?.video_id) {
+    // V2 API can return video_id in different places
+    const videoId = response.data?.video_id || response.video_id;
+
+    if (!videoId) {
         throw new Error(`HeyGen video creation failed: No video_id in response - ${JSON.stringify(response)}`);
     }
 
-    return response.data.video_id;
+    return videoId;
 }
 
 /**
