@@ -65,7 +65,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
               ${useDarkText ? 'text-christmas-red' : 'text-white'}
               group-hover:text-christmas-gold
             `}>
-                            Mesaj de la <span className="text-christmas-gold">Mosu&apos;</span>
+                            Mesajul <span className="text-christmas-gold">Mosului&apos;</span>
                         </span>
                     </Link>
 

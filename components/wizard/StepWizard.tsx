@@ -38,7 +38,7 @@ export function StepWizard({ currentStep, children }: StepWizardProps) {
                                 />
                             </motion.div>
                             <span className="font-bold text-xl text-christmas-red group-hover:text-christmas-gold transition-colors duration-300 font-christmas">
-                                Mesaj de la <span className="text-christmas-gold">Mosu'</span>
+                                Mesajul <span className="text-christmas-gold">Mosului</span>
                             </span>
                         </Link>
                     </nav>

@@ -9,7 +9,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Mesaj de la Mosu' - Mesaje Video Personalizate de la Moș Crăciun",
+  title: "Mesajul Mosului - Mesaje Video Personalizate de la Moș Crăciun",
   description: "Creează mesaje video magice, personalizate cu ajutorul AI de la Moș Crăciun pentru copilul tău. Fă acest Crăciun de neuitat cu un video în care Moșul îl strigă pe copil pe nume!",
   keywords: ["video Moș Crăciun", "mesaj personalizat Santa", "cadou de Crăciun", "AI Moș Crăciun", "video personalizat"],
   authors: [{ name: "SantaAI" }],

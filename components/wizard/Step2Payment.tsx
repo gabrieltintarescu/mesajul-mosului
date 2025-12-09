@@ -4,7 +4,7 @@ import { CTAButton } from '@/components/ui';
 import { applyCouponToOrder, createCheckoutSession, getOrderStatus, removeCouponFromOrder } from '@/lib/api';
 import { useWizardStore } from '@/store';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check, CheckCircle, CreditCard, Lock, Shield, Tag } from 'lucide-react';
+import { ArrowLeft, Check, CreditCard, Lock, Shield, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -22,14 +22,13 @@ export function Step2Payment() {
     const [paymentError, setPaymentError] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [orderPricing, setOrderPricing] = useState<OrderPricing | null>(null);
-    const [isAlreadyPaid, setIsAlreadyPaid] = useState(false);
 
     // Coupon state
     const [discountCode, setDiscountCode] = useState('');
     const [discountError, setDiscountError] = useState('');
     const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
 
-    // Fetch order details to get actual price
+    // Fetch order details to get actual price (no status check here)
     useEffect(() => {
         async function fetchOrderDetails() {
             if (!orderId || !email) {
@@ -41,16 +40,6 @@ export function Step2Payment() {
                 const response = await getOrderStatus(orderId, email);
                 if (response.success && response.data?.order) {
                     const order = response.data.order;
-
-                    // Check if order is already paid
-                    if (order.status !== 'pending_payment') {
-                        setIsAlreadyPaid(true);
-                        // Redirect to order page after a moment
-                        setTimeout(() => {
-                            router.push(`/order/${orderId}?email=${encodeURIComponent(email)}`);
-                        }, 2000);
-                    }
-
                     setOrderPricing({
                         finalPriceCents: order.final_price,
                         discountAmountCents: order.discount_amount || 0,
@@ -65,7 +54,7 @@ export function Step2Payment() {
         }
 
         fetchOrderDetails();
-    }, [orderId, email, router]);
+    }, [orderId, email]);
 
     // Calculate display price - use order's actual price or stored price
     const finalPriceCents = orderPricing?.finalPriceCents ?? orderFinalPriceCents ?? 8900;
@@ -152,16 +141,13 @@ export function Step2Payment() {
                 // Redirect to Stripe Checkout
                 window.location.href = checkoutResponse.data.url;
             } else {
-                // Check if it's an already paid error
+                // Check if it's an already paid error - redirect to order page
                 if (checkoutResponse.error === 'Order has already been paid') {
-                    setIsAlreadyPaid(true);
-                    setTimeout(() => {
-                        router.push(`/order/${orderId}?email=${encodeURIComponent(email)}`);
-                    }, 2000);
+                    router.push(`/order/${orderId}?email=${encodeURIComponent(email)}`);
                 } else {
                     setPaymentError(checkoutResponse.error || 'Eroare la crearea sesiunii de plată');
+                    setIsProcessing(false);
                 }
-                setIsProcessing(false);
             }
         } catch (error) {
             console.error('Payment error:', error);
@@ -187,28 +173,6 @@ export function Step2Payment() {
                     <p className="text-gray-600">Se încarcă detaliile comenzii...</p>
                 </div>
             </div>
-        );
-    }
-
-    // Show already paid message
-    if (isAlreadyPaid) {
-        return (
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="max-w-md mx-auto text-center"
-            >
-                <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                    <CheckCircle className="w-16 h-16 text-christmas-green mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2 font-christmas">
-                        Comandă Deja Plătită!
-                    </h2>
-                    <p className="text-gray-600 mb-4">
-                        Această comandă a fost deja achitată. Te redirecționăm către pagina comenzii...
-                    </p>
-                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-christmas-red border-t-transparent mx-auto"></div>
-                </div>
-            </motion.div>
         );
     }
 
