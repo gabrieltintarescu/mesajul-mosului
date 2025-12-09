@@ -157,7 +157,15 @@ export async function createHeyGenVideo(script: string): Promise<string> {
     console.log('HeyGen API response:', JSON.stringify(response, null, 2));
 
     if (response.code !== 100) {
-        const errorDetails = response.message || response.data || JSON.stringify(response);
+        // Properly stringify the error details
+        let errorDetails: string;
+        if (response.message) {
+            errorDetails = response.message;
+        } else if (response.data) {
+            errorDetails = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+        } else {
+            errorDetails = JSON.stringify(response);
+        }
         throw new Error(`HeyGen video creation failed: ${errorDetails}`);
     }
 
