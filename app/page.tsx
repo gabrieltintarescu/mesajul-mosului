@@ -45,31 +45,37 @@ export default function Home() {
       name: 'Maria P.',
       location: 'București, România',
       quote: 'Fața fetiței mele s-a luminat când Moșul i-a spus numele și a menționat dragostea ei pentru unicorni! L-a urmărit de 10 ori. Absolut magic!',
+      avatar: '/avatars/1.jpg',
     },
     {
       name: 'Andrei D.',
       location: 'Cluj-Napoca, România',
       quote: 'Cel mai bun cadou de Crăciun! Fiul meu nu-i venea să creadă că Moșul știa despre performanțele lui la fotbal. Merită fiecare ban.',
+      avatar: '/avatars/2.jpg',
     },
     {
       name: 'Elena M.',
       location: 'Iași, România',
       quote: 'Calitatea video este uimitoare și personalizarea este perfectă. Copiii mei cred că e Moșul adevărat! Vom comanda și anul viitor.',
+      avatar: '/avatars/3.jpg',
     },
     {
       name: 'Cristian R.',
       location: 'Timișoara, România',
       quote: 'Atât de ușor de folosit și livrat în câteva minute. Fiica mea a rămas fără cuvinte când Moșul a felicitat-o pentru că a învățat să citească!',
+      avatar: '/avatars/4.jpg',
     },
     {
       name: 'Georgiana T.',
       location: 'Brașov, România',
       quote: 'O experiență minunată! Copilul meu a plâns de bucurie. Videoclipul este de o calitate excelentă și personalizarea este incredibilă!',
+      avatar: '/avatars/5.jpg',
     },
     {
       name: 'Ionuț V.',
       location: 'Constanța, România',
       quote: 'Serviciu rapid și profesionist. Videoclipul a depășit toate așteptările. Fetița mea îl arată tuturor prietenilor ei!',
+      avatar: '/avatars/6.jpg',
     },
   ];
 
@@ -532,9 +538,11 @@ export default function Home() {
 
                   {/* Author */}
                   <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-christmas-red to-red-600 flex items-center justify-center text-white font-bold text-lg">
-                      {testimonial.name.charAt(0)}
-                    </div>
+                    <img
+                      src={testimonial.avatar}
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
                     <div>
                       <p className="font-semibold text-gray-900">{testimonial.name}</p>
                       <p className="text-sm text-gray-500">{testimonial.location}</p>
@@ -582,8 +590,7 @@ export default function Home() {
                 'Scenariu cu numele copilului',
                 'Menționează realizările și preferințele',
                 'Livrat în 15 minute',
-                'Descărcări și distribuiri nelimitate',
-                'Garanție de returnare 30 de zile',
+                'Descărcări și distribuiri nelimitate'
               ]}
             />
           </div>
