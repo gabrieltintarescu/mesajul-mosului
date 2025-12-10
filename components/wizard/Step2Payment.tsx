@@ -28,7 +28,7 @@ export function Step2Payment() {
     const [discountError, setDiscountError] = useState('');
     const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
 
-    // Fetch order details to get actual price (no status check here)
+    // Fetch order details and verify status before allowing payment
     useEffect(() => {
         async function fetchOrderDetails() {
             if (!orderId || !email) {
@@ -40,6 +40,14 @@ export function Step2Payment() {
                 const response = await getOrderStatus(orderId, email);
                 if (response.success && response.data?.order) {
                     const order = response.data.order;
+
+                    // CRITICAL: Check if order is already paid - redirect to status page
+                    if (order.status !== 'pending_payment') {
+                        console.log(`Order ${orderId} already has status ${order.status}, redirecting to status page`);
+                        router.push(`/status-comanda/${orderId}?email=${encodeURIComponent(email)}`);
+                        return;
+                    }
+
                     setOrderPricing({
                         finalPriceCents: order.finalPrice,
                         discountAmountCents: order.discountAmount || 0,
@@ -54,7 +62,7 @@ export function Step2Payment() {
         }
 
         fetchOrderDetails();
-    }, [orderId, email]);
+    }, [orderId, email, router]);
 
     // Calculate display price - use order's actual price or stored price
     const finalPriceCents = orderPricing?.finalPriceCents ?? orderFinalPriceCents ?? 8900;

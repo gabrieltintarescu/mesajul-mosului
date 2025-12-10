@@ -8,7 +8,7 @@ import { Suspense, useEffect, useState } from 'react';
 function WizardStep3Content() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { orderId: storeOrderId, childDetails, setOrderId, setChildDetails, setEmail, setOrderFinalPriceCents } = useWizardStore();
+    const { orderId: storeOrderId, childDetails, email: storeEmail, setOrderId, setChildDetails, setEmail, setOrderFinalPriceCents } = useWizardStore();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -18,59 +18,67 @@ function WizardStep3Content() {
 
     useEffect(() => {
         async function loadOrder() {
-            // If we have an orderId in URL but not in store, fetch the order to resume
-            if (urlOrderId && !storeOrderId) {
-                // Need email for security verification
-                if (!urlEmail) {
+            // Determine which orderId and email to use
+            const orderId = urlOrderId || storeOrderId;
+            const email = urlEmail || storeEmail;
+
+            if (!orderId) {
+                // No order anywhere, redirect to step 1
+                router.push('/comanda/pas-1');
+                return;
+            }
+
+            if (!email) {
+                // Have orderId but no email - can't verify
+                if (urlOrderId) {
                     setError('Link invalid - email lipsește');
                     setIsLoading(false);
-                    return;
+                } else {
+                    // Store has orderId but no email, redirect to step 1
+                    router.push('/comanda/pas-1');
                 }
+                return;
+            }
 
-                try {
-                    const response = await fetch(`/api/orders/${urlOrderId}?email=${encodeURIComponent(urlEmail)}`);
-                    const result = await response.json();
+            try {
+                // ALWAYS verify order status from server before allowing payment
+                const response = await fetch(`/api/orders/${orderId}?email=${encodeURIComponent(email)}`);
+                const result = await response.json();
 
-                    if (result.success && result.data?.order) {
-                        const order = result.data.order;
+                if (result.success && result.data?.order) {
+                    const order = result.data.order;
 
-                        // Check if order is still pending payment
-                        if (order.status !== 'pending_payment') {
-                            // Order already paid or processed, redirect to order page with email
-                            router.push(`/status-comanda/${urlOrderId}?email=${encodeURIComponent(urlEmail)}`);
-                            return;
-                        }
-
-                        // Restore order data to store (including email for payment step)
-                        setOrderId(order.id);
-                        setEmail(urlEmail);  // Set email from URL so Step2Payment can use it
-                        if (order.final_price) {
-                            setOrderFinalPriceCents(order.final_price);
-                        }
-                        if (order.childDetails) {
-                            setChildDetails(order.childDetails);
-                        }
-
-                        setIsLoading(false);
-                    } else {
-                        setError('Comanda nu a fost găsită');
-                        setIsLoading(false);
+                    // Check if order is still pending payment
+                    if (order.status !== 'pending_payment') {
+                        // Order already paid or processed, redirect to status page
+                        console.log(`Order ${orderId} already has status ${order.status}, redirecting`);
+                        router.push(`/status-comanda/${orderId}?email=${encodeURIComponent(email)}`);
+                        return;
                     }
-                } catch {
-                    setError('Eroare la încărcarea comenzii');
+
+                    // Restore/update order data in store
+                    setOrderId(order.id);
+                    setEmail(email);
+                    if (order.final_price) {
+                        setOrderFinalPriceCents(order.final_price);
+                    }
+                    if (order.childDetails) {
+                        setChildDetails(order.childDetails);
+                    }
+
+                    setIsLoading(false);
+                } else {
+                    setError('Comanda nu a fost găsită');
                     setIsLoading(false);
                 }
-            } else if (storeOrderId && childDetails.name) {
-                // We have order in store, proceed normally
+            } catch {
+                setError('Eroare la încărcarea comenzii');
                 setIsLoading(false);
-            } else {
-                // No order in URL or store, redirect to step 1
-                router.push('/comanda/pas-1');
             }
         }
 
         loadOrder();
-    }, [urlOrderId, urlEmail, storeOrderId, childDetails.name, router, setOrderId, setChildDetails, setEmail, setOrderFinalPriceCents]);
+    }, [urlOrderId, urlEmail, storeOrderId, storeEmail, childDetails.name, router, setOrderId, setChildDetails, setEmail, setOrderFinalPriceCents]);
 
     if (isLoading) {
         return (
