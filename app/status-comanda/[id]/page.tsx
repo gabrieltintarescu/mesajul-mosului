@@ -35,6 +35,11 @@ function getStepIndex(status: OrderStatus): number {
     return index >= 0 ? index : 0;
 }
 
+// Get short order ID (first segment before -) for easier customer support
+function getShortOrderId(orderId: string): string {
+    return orderId.split('-')[0].toUpperCase();
+}
+
 export default function OrderStatusPage() {
     const params = useParams();
     const searchParams = useSearchParams();
@@ -70,6 +75,7 @@ export default function OrderStatusPage() {
     const currentStepIndex = order ? getStepIndex(order.status) : 0;
     const isCompleted = order?.status === 'completed';
     const isFailed = order?.status === 'failed';
+    const shortOrderId = getShortOrderId(orderId);
 
     // Show loading while hydrating, waiting for email, or initial load
     // Don't show loading if we already have order data (prevents flashing during polling)
@@ -155,7 +161,7 @@ export default function OrderStatusPage() {
                         >
                             <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-full shadow-sm mb-4 sm:mb-6">
                                 <span className="text-xs sm:text-sm text-gray-500">ID Comandă:</span>
-                                <code className="text-xs sm:text-sm font-mono text-christmas-red truncate max-w-[120px] sm:max-w-none">{orderId}</code>
+                                <code className="text-xs sm:text-sm font-mono text-christmas-red">{shortOrderId}</code>
                             </div>
 
                             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 font-christmas px-2">
@@ -316,7 +322,7 @@ export default function OrderStatusPage() {
                                             <div className="flex items-center justify-center gap-2">
                                                 <span className="text-gray-500">Email:</span>
                                                 <a
-                                                    href={`mailto:${siteConfig.contact.email}?subject=Problemă comandă ${orderId}&body=Bună ziua,%0D%0A%0D%0AAm o problemă cu comanda mea.%0D%0A%0D%0AID Comandă: ${orderId}%0D%0AEmail: ${order.email}%0D%0ANume copil: ${order.childDetails.name}%0D%0A%0D%0AEroare: ${order.errorMessage || 'N/A'}%0D%0A%0D%0AVă mulțumesc!`}
+                                                    href={`mailto:${siteConfig.contact.email}?subject=Problemă comandă ${shortOrderId}&body=Bună ziua,%0D%0A%0D%0AAm o problemă cu comanda mea.%0D%0A%0D%0AID Comandă: ${shortOrderId}%0D%0AEmail: ${order.email}%0D%0ANume copil: ${order.childDetails.name}%0D%0A%0D%0AEroare: ${order.errorMessage || 'N/A'}%0D%0A%0D%0AVă mulțumesc!`}
                                                     className="text-christmas-red hover:underline font-medium"
                                                 >
                                                     {siteConfig.contact.email}
@@ -336,7 +342,7 @@ export default function OrderStatusPage() {
                                             <div className="flex items-center justify-center gap-2">
                                                 <span className="text-gray-500">WhatsApp:</span>
                                                 <a
-                                                    href={`https://wa.me/${siteConfig.contact.whatsapp}?text=Bună! Am o problemă cu comanda ${orderId}`}
+                                                    href={`https://wa.me/${siteConfig.contact.whatsapp}?text=Bună! Am o problemă cu comanda ${shortOrderId}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-christmas-red hover:underline font-medium"
@@ -347,7 +353,7 @@ export default function OrderStatusPage() {
                                         </div>
 
                                         <p className="text-xs text-gray-500 mt-4">
-                                            Menționează ID-ul comenzii: <code className="bg-gray-200 px-1 rounded">{orderId}</code>
+                                            Menționează ID-ul comenzii: <code className="bg-gray-200 px-1 rounded font-mono">{shortOrderId}</code>
                                         </p>
                                     </div>
 
