@@ -49,7 +49,7 @@ export function Footer() {
                     <div className="lg:col-span-2">
                         <Link href="/" className="inline-flex items-center gap-2 mb-4">
                             <Image
-                                src="/santaicon.png"
+                                src="/santaicon2.png"
                                 alt="Santa AI Logo"
                                 width={40}
                                 height={40}

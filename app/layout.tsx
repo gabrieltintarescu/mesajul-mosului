@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   keywords: ["video Moș Crăciun", "mesaj personalizat Santa", "cadou de Crăciun", "AI Moș Crăciun", "video personalizat"],
   authors: [{ name: "Mesajul Mosului" }],
   icons: {
-    icon: "/santaicon.png",
-    apple: "/santaicon.png",
+    icon: "/santaicon2.png",
+    apple: "/santaicon2.png",
   },
   openGraph: {
     title: "Mesajul Mosului - Mesaje Video Personalizate de la Moș Crăciun",

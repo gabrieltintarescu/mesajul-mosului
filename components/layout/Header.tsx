@@ -53,7 +53,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
                             transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                         >
                             <Image
-                                src="/santaicon.png"
+                                src="/santaicon2.png"
                                 alt="Santa AI Logo"
                                 width={40}
                                 height={40}
