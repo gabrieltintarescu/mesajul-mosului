@@ -178,7 +178,7 @@ export default function Home() {
               className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight font-christmas"
             >
               Mesaje Video Personalizate de la{' '}
-              <span className="text-christmas-gold">Moș Crăciun</span>
+              <span className="text-christmas-gold">Mos Craciun</span>
             </motion.h1>
 
             {/* Subtitle */}
@@ -368,7 +368,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
-              Cum funcționează?
+              Cum functioneaza?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Creează videoclipul personalizat de la Moș Crăciun în doar 4 pași simpli.
@@ -462,7 +462,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
-              Vezi Magia în Acțiune
+              Vezi Magia în Actiune
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Urmărește un exemplu de video personalizat de la Moș Crăciun.
@@ -509,7 +509,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
-              Iubit de <span className="text-christmas-green">Familii</span> din Toată Lumea
+              Iubit de <span className="text-christmas-green">Familii</span> din Toata Lumea
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Alătură-te miilor de părinți fericiți care au făcut Crăciunul de neuitat.
@@ -571,7 +571,7 @@ export default function Home() {
               <span className="text-sm font-medium">Ofertă de Sărbători</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
-              Prețuri Simple și Transparente
+              Preturi Simple si Transparente
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Un singur preț, fără costuri ascunse. Creează amintiri magice pentru familia ta.
@@ -580,7 +580,7 @@ export default function Home() {
 
           <div className="max-w-lg mx-auto">
             <PricingBox
-              title="Pachetul Magia Crăciunului"
+              title="Pachetul Magia Craciunului"
               price={89}
               originalPrice={129}
               isPopular
