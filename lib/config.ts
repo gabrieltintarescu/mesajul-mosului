@@ -7,9 +7,9 @@ export const siteConfig = {
     // Informații de contact
     contact: {
         email: 'contact@mesajul-mosului.ro',
-        phone: '0751 954 687',
-        phoneInternational: '+40751954687',
-        whatsapp: '40751954687', // fără + pentru link wa.me
+        phone: '0750 253 850',
+        phoneInternational: '+40750253850',
+        whatsapp: '40750253850', // fără + pentru link wa.me
     },
 
     // Social media
