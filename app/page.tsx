@@ -225,10 +225,17 @@ export default function Home() {
                 <Star className="w-5 h-5 text-christmas-gold fill-current" />
                 <span>4.9/5 Rating</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                <span>Livrare în 15 Min</span>
-              </div>
+            </motion.div>
+
+            {/* Fast Delivery Badge - Highlighted */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+              className="mt-8 inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-christmas-gold to-yellow-400 text-christmas-dark font-bold text-lg shadow-lg animate-pulse-glow"
+            >
+              <Clock className="w-6 h-6" />
+              <span>⚡ Livrare în doar 15 Minute!</span>
             </motion.div>
           </div>
         </div>
