@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import {
     Clock,
     Mail,
-    MessageCircle,
     Phone,
     Send
 } from 'lucide-react';
@@ -12,7 +11,7 @@ import { useState } from 'react';
 
 import { Footer, Header } from '@/components/layout';
 import { SnowfallBackground } from '@/components/sections';
-import { CTAButton, InputField, TextAreaField } from '@/components/ui';
+import { CTAButton, InputField, TextAreaField, WhatsAppIcon } from '@/components/ui';
 import { getContactLinks, siteConfig } from '@/lib/config';
 
 export default function ContactPage() {
@@ -70,7 +69,7 @@ export default function ContactPage() {
             description: 'Luni - Vineri, 9:00 - 18:00',
         },
         {
-            icon: MessageCircle,
+            icon: WhatsAppIcon,
             title: 'WhatsApp',
             value: siteConfig.contact.phone,
             href: contactLinks.whatsappLink,
