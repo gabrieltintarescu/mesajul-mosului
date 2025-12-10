@@ -9,25 +9,39 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Mesajul Mosului - Mesaje Video Personalizate de la Moș Crăciun",
+  metadataBase: new URL('https://mesajul-mosului.ro'),
+  title: {
+    default: "Mesajul Moșului - Mesaje Video Personalizate de la Moș Crăciun",
+    template: "%s | Mesajul Moșului",
+  },
   description: "Creează mesaje video magice, personalizate cu ajutorul AI de la Moș Crăciun pentru copilul tău. Fă acest Crăciun de neuitat cu un video în care Moșul îl strigă pe copil pe nume!",
   keywords: ["video Moș Crăciun", "mesaj personalizat Santa", "cadou de Crăciun", "AI Moș Crăciun", "video personalizat"],
-  authors: [{ name: "Mesajul Mosului" }],
+  authors: [{ name: "Mesajul Moșului" }],
   icons: {
     icon: "/santaicon2.png",
     apple: "/santaicon2.png",
   },
   openGraph: {
-    title: "Mesajul Mosului - Mesaje Video Personalizate de la Moș Crăciun",
-    description: "Creează mesaje video magice personalizate de la Moș Crăciun pentru copilul tău",
+    title: "Mesajul Moșului - Mesaje Video Personalizate de la Moș Crăciun",
+    description: "Creează mesaje video magice personalizate de la Moș Crăciun pentru copilul tău. Fă acest Crăciun de neuitat!",
     type: "website",
     locale: "ro_RO",
-    siteName: "Mesajul Mosului",
+    siteName: "Mesajul Moșului",
+    url: "https://mesajul-mosului.ro",
+    images: [
+      {
+        url: "/santa_banner.png",
+        width: 1200,
+        height: 630,
+        alt: "Mesajul Moșului - Video personalizat de la Moș Crăciun",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mesajul Mosului - Video Personalizat de la Moș Crăciun",
+    title: "Mesajul Moșului - Video Personalizat de la Moș Crăciun",
     description: "Creează mesaje video magice personalizate de la Moș Crăciun pentru copilul tău",
+    images: ["/santa_banner.png"],
   },
   robots: {
     index: true,
