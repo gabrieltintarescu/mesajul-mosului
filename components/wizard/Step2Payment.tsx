@@ -333,6 +333,11 @@ export function Step2Payment() {
                             )}
                         </div>
 
+                        {/* Terms Disclaimer */}
+                        <p className="text-xs text-gray-500 text-center mb-4">
+                            Prin apăsarea butonului de plată, confirmi că ai citit și ești de acord cu Termenii și Condițiile.
+                        </p>
+
                         {/* Pay Button */}
                         <CTAButton
                             size="lg"
