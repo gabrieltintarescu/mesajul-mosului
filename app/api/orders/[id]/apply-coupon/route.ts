@@ -16,7 +16,7 @@ export async function POST(
 
         if (!body.couponCode) {
             return NextResponse.json(
-                { success: false, error: 'Coupon code is required' },
+                { success: false, error: 'Codul cuponului este obligatoriu' },
                 { status: 400 }
             );
         }
@@ -30,7 +30,7 @@ export async function POST(
 
         if (orderError || !order) {
             return NextResponse.json(
-                { success: false, error: 'Order not found' },
+                { success: false, error: 'Comanda nu a fost găsită' },
                 { status: 404 }
             );
         }
@@ -38,7 +38,7 @@ export async function POST(
         // Only allow coupon application for pending orders
         if (order.status !== 'pending_payment') {
             return NextResponse.json(
-                { success: false, error: 'Cannot apply coupon to a paid order' },
+                { success: false, error: 'Nu se poate aplica un cupon pe o comandă plătită' },
                 { status: 400 }
             );
         }
@@ -55,7 +55,7 @@ export async function POST(
 
         if (couponError || !coupon) {
             return NextResponse.json(
-                { success: false, error: 'Invalid coupon code' },
+                { success: false, error: 'Cod cupon invalid' },
                 { status: 400 }
             );
         }
@@ -63,7 +63,7 @@ export async function POST(
         // Check if expired
         if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
             return NextResponse.json(
-                { success: false, error: 'This coupon has expired' },
+                { success: false, error: 'Acest cupon a expirat' },
                 { status: 400 }
             );
         }
@@ -71,7 +71,7 @@ export async function POST(
         // Check max uses
         if (coupon.max_uses !== null && coupon.current_uses >= coupon.max_uses) {
             return NextResponse.json(
-                { success: false, error: 'This coupon has reached its usage limit' },
+                { success: false, error: 'Acest cupon a atins limita de utilizări' },
                 { status: 400 }
             );
         }
@@ -103,7 +103,7 @@ export async function POST(
         if (updateError) {
             console.error('Error updating order with coupon:', updateError);
             return NextResponse.json(
-                { success: false, error: 'Failed to apply coupon' },
+                { success: false, error: 'Nu s-a putut aplica cuponul' },
                 { status: 500 }
             );
         }
@@ -121,7 +121,7 @@ export async function POST(
     } catch (error) {
         console.error('Error in POST /api/orders/[id]/apply-coupon:', error);
         return NextResponse.json(
-            { success: false, error: 'Internal server error' },
+            { success: false, error: 'Eroare internă de server' },
             { status: 500 }
         );
     }
@@ -144,7 +144,7 @@ export async function DELETE(
 
         if (orderError || !order) {
             return NextResponse.json(
-                { success: false, error: 'Order not found' },
+                { success: false, error: 'Comanda nu a fost găsită' },
                 { status: 404 }
             );
         }
@@ -152,7 +152,7 @@ export async function DELETE(
         // Only allow coupon removal for pending orders
         if (order.status !== 'pending_payment') {
             return NextResponse.json(
-                { success: false, error: 'Cannot modify a paid order' },
+                { success: false, error: 'Nu se poate modifica o comandă plătită' },
                 { status: 400 }
             );
         }
@@ -173,7 +173,7 @@ export async function DELETE(
         if (updateError) {
             console.error('Error removing coupon from order:', updateError);
             return NextResponse.json(
-                { success: false, error: 'Failed to remove coupon' },
+                { success: false, error: 'Nu s-a putut elimina cuponul' },
                 { status: 500 }
             );
         }
@@ -187,7 +187,7 @@ export async function DELETE(
     } catch (error) {
         console.error('Error in DELETE /api/orders/[id]/apply-coupon:', error);
         return NextResponse.json(
-            { success: false, error: 'Internal server error' },
+            { success: false, error: 'Eroare internă de server' },
             { status: 500 }
         );
     }

@@ -26,7 +26,7 @@ export async function POST(request: Request) {
         // Validate required fields
         if (!body.email || !body.childDetails) {
             return NextResponse.json(
-                { success: false, error: 'Email and child details are required' },
+                { success: false, error: 'Email-ul și detaliile copilului sunt obligatorii' },
                 { status: 400 }
             );
         }
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         // Validate email format
         if (!isValidEmail(body.email)) {
             return NextResponse.json(
-                { success: false, error: 'Invalid email format' },
+                { success: false, error: 'Format email invalid' },
                 { status: 400 }
             );
         }
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         const { name, age, gender, achievements, favoriteThings, behavior } = body.childDetails;
         if (!name || !age || !gender || !achievements || !favoriteThings || !behavior) {
             return NextResponse.json(
-                { success: false, error: 'All child details fields are required' },
+                { success: false, error: 'Toate câmpurile despre copil sunt obligatorii' },
                 { status: 400 }
             );
         }
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
 
             if (couponError || !coupon) {
                 return NextResponse.json(
-                    { success: false, error: 'Invalid coupon code' },
+                    { success: false, error: 'Cod cupon invalid' },
                     { status: 400 }
                 );
             }
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
             // Check if expired
             if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
                 return NextResponse.json(
-                    { success: false, error: 'Coupon has expired' },
+                    { success: false, error: 'Acest cupon a expirat' },
                     { status: 400 }
                 );
             }
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
             // Check max uses
             if (coupon.max_uses !== null && coupon.current_uses >= coupon.max_uses) {
                 return NextResponse.json(
-                    { success: false, error: 'Coupon usage limit reached' },
+                    { success: false, error: 'Limita de utilizare a cuponului a fost atinsă' },
                     { status: 400 }
                 );
             }
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
             });
             console.error('Error creating order:', orderError);
             return NextResponse.json(
-                { success: false, error: 'Failed to create order' },
+                { success: false, error: 'Nu s-a putut crea comanda' },
                 { status: 500 }
             );
         }
@@ -186,7 +186,7 @@ export async function POST(request: Request) {
         });
         console.error('Error in POST /api/orders:', error);
         return NextResponse.json(
-            { success: false, error: 'Internal server error' },
+            { success: false, error: 'Eroare internă de server' },
             { status: 500 }
         );
     }

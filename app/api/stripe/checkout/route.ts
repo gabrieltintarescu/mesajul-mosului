@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
         if (!body.orderId) {
             return NextResponse.json(
-                { success: false, error: 'Order ID is required' },
+                { success: false, error: 'ID-ul comenzii este obligatoriu' },
                 { status: 400 }
             );
         }
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
         if (orderError || !order) {
             return NextResponse.json(
-                { success: false, error: 'Order not found' },
+                { success: false, error: 'Comanda nu a fost găsită' },
                 { status: 404 }
             );
         }
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         // Prevent checkout for already paid orders
         if (order.status !== 'pending_payment') {
             return NextResponse.json(
-                { success: false, error: 'Order has already been paid' },
+                { success: false, error: 'Comanda a fost deja plătită' },
                 { status: 400 }
             );
         }
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error('Error in POST /api/stripe/checkout:', error);
         return NextResponse.json(
-            { success: false, error: 'Failed to create checkout session' },
+            { success: false, error: 'Nu s-a putut crea sesiunea de plată' },
             { status: 500 }
         );
     }

@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: RouteParams) {
         // Require email for verification to prevent order ID enumeration
         if (!email) {
             return NextResponse.json(
-                { success: false, error: 'Email verification required' },
+                { success: false, error: 'Verificarea email-ului este necesară' },
                 { status: 400 }
             );
         }
@@ -29,7 +29,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
         if (error || !order) {
             return NextResponse.json(
-                { success: false, error: 'Order not found' },
+                { success: false, error: 'Comanda nu a fost găsită' },
                 { status: 404 }
             );
         }
@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: RouteParams) {
         if (order.email.toLowerCase() !== email.toLowerCase()) {
             // Return same error as "not found" to prevent enumeration
             return NextResponse.json(
-                { success: false, error: 'Order not found' },
+                { success: false, error: 'Comanda nu a fost găsită' },
                 { status: 404 }
             );
         }
@@ -67,7 +67,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     } catch (error) {
         console.error('Error in GET /api/orders/[id]:', error);
         return NextResponse.json(
-            { success: false, error: 'Internal server error' },
+            { success: false, error: 'Eroare internă de server' },
             { status: 500 }
         );
     }

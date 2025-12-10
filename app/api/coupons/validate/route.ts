@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
         if (!body.code) {
             return NextResponse.json(
-                { success: false, error: 'Coupon code is required' },
+                { success: false, error: 'Codul cuponului este obligatoriu' },
                 { status: 400 }
             );
         }
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
         if (error || !coupon) {
             return NextResponse.json(
-                { success: false, error: 'Invalid coupon code' },
+                { success: false, error: 'Cod cupon invalid' },
                 { status: 400 }
             );
         }
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
         // Check if expired
         if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
             return NextResponse.json(
-                { success: false, error: 'This coupon has expired' },
+                { success: false, error: 'Acest cupon a expirat' },
                 { status: 400 }
             );
         }
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
         // Check max uses
         if (coupon.max_uses !== null && coupon.current_uses >= coupon.max_uses) {
             return NextResponse.json(
-                { success: false, error: 'This coupon has reached its usage limit' },
+                { success: false, error: 'Acest cupon a atins limita de utilizări' },
                 { status: 400 }
             );
         }
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error('Error in POST /api/coupons/validate:', error);
         return NextResponse.json(
-            { success: false, error: 'Internal server error' },
+            { success: false, error: 'Eroare internă de server' },
             { status: 500 }
         );
     }
