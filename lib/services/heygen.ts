@@ -79,7 +79,7 @@ export async function createHeyGenVideoFromTemplate(script: string): Promise<str
     }
 
     const payload = {
-        title: `Santa Video - ${new Date().toISOString()}`,
+        title: `Santa-Video-${new Date().toISOString()}`,
         // Force 720p resolution (Essential API plan limit)
         // removed as now we have paid plan
         // dimension: {

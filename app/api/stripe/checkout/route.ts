@@ -52,9 +52,9 @@ export async function POST(request: Request) {
                     price_data: {
                         currency: 'ron',
                         product_data: {
-                            name: `Santa Video for ${order.child_details.name}`,
-                            description: `Personalized Santa Claus video message for ${order.child_details.name}`,
-                            images: ['https://images.unsplash.com/photo-1545239351-ef35f43d514b?w=400'],
+                            name: `Video personalizat pentru ${order.child_details.name}`,
+                            description: `Mesaj video personalizat de la Mosu' pentru ${order.child_details.name}`,
+                            images: ['https://qtcyuosyykgqjfmqtmyo.supabase.co/storage/v1/object/public/videos/assets/stripe-product-image.png'],
                         },
                         unit_amount: order.final_price,
                     },
