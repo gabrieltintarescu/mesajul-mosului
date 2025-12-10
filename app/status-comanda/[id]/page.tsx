@@ -71,8 +71,9 @@ export default function OrderStatusPage() {
     const isCompleted = order?.status === 'completed';
     const isFailed = order?.status === 'failed';
 
-    // Show loading while hydrating or waiting for email
-    if (!isHydrated || (isLoading && !order) || (!email && !error)) {
+    // Show loading while hydrating, waiting for email, or initial load
+    // Don't show loading if we already have order data (prevents flashing during polling)
+    if (!isHydrated || (!email && !error) || (isLoading && !order)) {
         return (
             <>
                 <Header variant="light" />
