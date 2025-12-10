@@ -569,6 +569,123 @@ export const orderCleanupJob = inngest.createFunction(
     }
 );
 
+/**
+ * Scheduled job to clean up orphan video files from Supabase storage
+ * Runs every 3 days and removes video folders for orders that no longer exist
+ * This helps keep storage costs down by removing abandoned files
+ */
+export const storageCleanupJob = inngest.createFunction(
+    {
+        id: 'storage-cleanup-daily',
+        name: 'Daily Storage Cleanup',
+    },
+    { cron: '0 4 */3 * *' }, // Run at 4 AM every 3 days
+    async ({ step }) => {
+        const result = await step.run('cleanup-orphan-files', async () => {
+            // List all folders in videos/orders/
+            const { data: folders, error: listError } = await supabaseAdmin.storage
+                .from('videos')
+                .list('orders', {
+                    limit: 1000,
+                    sortBy: { column: 'name', order: 'asc' },
+                });
+
+            if (listError) {
+                Sentry.captureException(listError, {
+                    extra: { context: 'Failed to list storage folders' },
+                });
+                throw listError;
+            }
+
+            if (!folders || folders.length === 0) {
+                return { deletedFolders: 0, deletedFiles: 0 };
+            }
+
+            // Filter to only get folders (folders have no metadata like id)
+            const orderFolders = folders.filter(item => !item.metadata);
+
+            if (orderFolders.length === 0) {
+                return { deletedFolders: 0, deletedFiles: 0 };
+            }
+
+            // Get all order IDs from the folders
+            const folderOrderIds = orderFolders.map(folder => folder.name);
+
+            // Check which orders still exist in the database
+            const { data: existingOrders, error: dbError } = await supabaseAdmin
+                .from('orders')
+                .select('id')
+                .in('id', folderOrderIds);
+
+            if (dbError) {
+                Sentry.captureException(dbError, {
+                    extra: { context: 'Failed to fetch existing orders' },
+                });
+                throw dbError;
+            }
+
+            const existingOrderIds = new Set(existingOrders?.map(order => order.id) || []);
+
+            // Find orphan folders (folders for orders that no longer exist)
+            const orphanFolderIds = folderOrderIds.filter(id => !existingOrderIds.has(id));
+
+            if (orphanFolderIds.length === 0) {
+                return { deletedFolders: 0, deletedFiles: 0 };
+            }
+
+            let totalDeletedFiles = 0;
+
+            // Delete each orphan folder and its contents
+            for (const orderId of orphanFolderIds) {
+                // List all files in the folder
+                const { data: files, error: filesError } = await supabaseAdmin.storage
+                    .from('videos')
+                    .list(`orders/${orderId}`, {
+                        limit: 100,
+                    });
+
+                if (filesError) {
+                    Sentry.captureException(filesError, {
+                        extra: { context: `Failed to list files for order ${orderId}` },
+                    });
+                    continue;
+                }
+
+                if (files && files.length > 0) {
+                    // Delete all files in the folder
+                    const filePaths = files.map(file => `orders/${orderId}/${file.name}`);
+                    const { error: deleteError } = await supabaseAdmin.storage
+                        .from('videos')
+                        .remove(filePaths);
+
+                    if (deleteError) {
+                        Sentry.captureException(deleteError, {
+                            extra: { context: `Failed to delete files for order ${orderId}` },
+                        });
+                        continue;
+                    }
+
+                    totalDeletedFiles += files.length;
+                }
+            }
+
+            Sentry.addBreadcrumb({
+                category: 'storage-cleanup',
+                message: `Cleaned up ${orphanFolderIds.length} orphan folders with ${totalDeletedFiles} files`,
+                level: 'info',
+            });
+
+            return {
+                deletedFolders: orphanFolderIds.length,
+                deletedFiles: totalDeletedFiles,
+                orphanOrderIds: orphanFolderIds,
+            };
+        });
+
+        return { success: true, ...result };
+    }
+);
+
 // Export all functions for the Inngest handler
 export const functions = [
     videoGenerationJob,
@@ -576,4 +693,5 @@ export const functions = [
     paymentCompletedEmail,
     orderExpirationScheduler,
     orderCleanupJob,
+    storageCleanupJob,
 ];

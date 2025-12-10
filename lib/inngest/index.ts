@@ -1,3 +1,3 @@
 export { inngest } from './client';
-export { functions, paymentCompletedEmail, paymentLinkEmail, videoGenerationJob } from './functions';
+export { functions, paymentCompletedEmail, paymentLinkEmail, storageCleanupJob, videoGenerationJob } from './functions';
 
