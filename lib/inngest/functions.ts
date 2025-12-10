@@ -128,7 +128,7 @@ export const videoGenerationJob = inngest.createFunction(
                 .update({ status: 'generating_video', updated_at: new Date().toISOString() })
                 .eq('id', orderId);
 
-            const videoId = await createHeyGenVideo(script);
+            const videoId = await createHeyGenVideo(script, orderId);
 
             await supabaseAdmin
                 .from('orders')

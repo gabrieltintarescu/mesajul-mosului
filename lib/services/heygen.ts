@@ -71,15 +71,18 @@ async function heygenFetch<T>(endpoint: string, options: RequestInit = {}): Prom
  * 4. Add Scene 3: Your outro video/animation
  * 5. Save and copy the Template ID to HEYGEN_TEMPLATE_ID env var
  */
-export async function createHeyGenVideoFromTemplate(script: string): Promise<string> {
+export async function createHeyGenVideoFromTemplate(script: string, orderId?: string): Promise<string> {
     const templateId = process.env.HEYGEN_TEMPLATE_ID;
 
     if (!templateId) {
         throw new Error('HEYGEN_TEMPLATE_ID must be configured for template-based generation');
     }
 
+    // Use short order ID (first segment) for easier identification
+    const shortOrderId = orderId ? orderId.split('-')[0].toUpperCase() : new Date().toISOString();
+
     const payload = {
-        title: `Santa-Video-${new Date().toISOString()}`,
+        title: `Santa-${shortOrderId}`,
         // Force 720p resolution (Essential API plan limit)
         // removed as now we have paid plan
         // dimension: {
@@ -115,11 +118,11 @@ export async function createHeyGenVideoFromTemplate(script: string): Promise<str
  * Create a video generation task with HeyGen (direct avatar, no template)
  * Use this if you don't need intro/outro
  */
-export async function createHeyGenVideo(script: string): Promise<string> {
+export async function createHeyGenVideo(script: string, orderId?: string): Promise<string> {
     // If template ID is configured, use template-based generation (includes intro/outro)
     if (process.env.HEYGEN_TEMPLATE_ID) {
         console.log('Using HeyGen template for video generation (includes intro/outro)');
-        return createHeyGenVideoFromTemplate(script);
+        return createHeyGenVideoFromTemplate(script, orderId);
     }
 
     // Otherwise, use direct avatar generation (no intro/outro)
