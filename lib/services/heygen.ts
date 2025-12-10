@@ -81,10 +81,11 @@ export async function createHeyGenVideoFromTemplate(script: string): Promise<str
     const payload = {
         title: `Santa Video - ${new Date().toISOString()}`,
         // Force 720p resolution (Essential API plan limit)
-        dimension: {
-            width: 1280,
-            height: 720,
-        },
+        // removed as now we have paid plan
+        // dimension: {
+        //     width: 1280,
+        //     height: 720,
+        // },
         variables: {
             // The key must match the variable name in your template exactly
             // In HeyGen template editor, the variable should be named "script"
