@@ -36,8 +36,8 @@ function WizardStep3Content() {
 
                         // Check if order is still pending payment
                         if (order.status !== 'pending_payment') {
-                            // Order already paid or processed, redirect to order page
-                            router.push(`/status-comanda/${urlOrderId}`);
+                            // Order already paid or processed, redirect to order page with email
+                            router.push(`/status-comanda/${urlOrderId}?email=${encodeURIComponent(urlEmail)}`);
                             return;
                         }
 
