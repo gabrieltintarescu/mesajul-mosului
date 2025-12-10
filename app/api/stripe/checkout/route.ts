@@ -53,8 +53,8 @@ export async function POST(request: Request) {
                         currency: 'ron',
                         product_data: {
                             name: `Video personalizat pentru ${order.child_details.name}`,
-                            description: `Mesaj video personalizat de la Mosu' pentru ${order.child_details.name}`,
-                            images: ['https://qtcyuosyykgqjfmqtmyo.supabase.co/storage/v1/object/public/videos/assets/stripe-product-image.png'],
+                            description: `🎅 Mesaj video magic de la Moș Crăciun pentru ${order.child_details.name}! Videoclip personalizat HD, livrat în 15 minute pe email. Creat cu dragoste pentru a aduce bucurie și zâmbete în ochii celui mic.`,
+                            images: ['https://qtcyuosyykgqjfmqtmyo.supabase.co/storage/v1/object/public/videos/assets/stripe-product.png'],
                         },
                         unit_amount: order.final_price,
                     },
