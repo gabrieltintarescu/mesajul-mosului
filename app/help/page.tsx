@@ -326,9 +326,9 @@ export default function HelpPage() {
                                 </CTAButton>
                             </Link>
                             <Link href="/intrebari-frecvente">
-                                <CTAButton className="!bg-gray-100 !text-gray-900 hover:!bg-gray-200">
+                                <CTAButton>
                                     <HelpCircle className="w-5 h-5 mr-2" />
-                                    Vezi FAQ
+                                    Vezi Întrebările Frecvente
                                 </CTAButton>
                             </Link>
                         </div>

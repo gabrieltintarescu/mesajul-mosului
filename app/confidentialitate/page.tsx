@@ -53,14 +53,6 @@ export default function PrivacyPage() {
                                     pe care le furnizați atunci când utilizați site-ul nostru {siteConfig.brand.name}
                                     (mesajul-mosului.ro).
                                 </p>
-                                <div className="mt-4 text-sm text-gray-500">
-                                    <p><strong>Date firmă:</strong></p>
-                                    <p>GTC SELECT GRUP SRL</p>
-                                    <p>CUI: 39138255</p>
-                                    <p>Reg. Com.: J40/4601/2018</p>
-                                    <p>Adresa: Str. Comarnic 59, București, România</p>
-                                    <p>Email: {siteConfig.contact.email}</p>
-                                </div>
                             </div>
 
                             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
@@ -109,15 +101,8 @@ export default function PrivacyPage() {
                             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Partajarea Datelor</h2>
                                 <p className="text-gray-600 leading-relaxed mb-4">
-                                    Datele dumneavoastră pot fi partajate cu:
+                                    Datele dumneavoastră pot fi partajate cu alte terțe pentru furnizarea produsului digital, cât și cu autorități când este cerut de lege.
                                 </p>
-                                <ul className="list-disc list-inside text-gray-600 space-y-2">
-                                    <li><strong>Stripe:</strong> pentru procesarea securizată a plăților</li>
-                                    <li><strong>Resend:</strong> pentru trimiterea emailurilor</li>
-                                    <li><strong>HeyGen:</strong> pentru generarea videoclipurilor personalizate</li>
-                                    <li><strong>Supabase:</strong> pentru stocarea securizată a datelor</li>
-                                    <li><strong>Autorități:</strong> când este cerut de lege</li>
-                                </ul>
                                 <p className="text-gray-600 leading-relaxed mt-4">
                                     Nu vindem și nu închiriem datele dumneavoastră personale către terți.
                                 </p>

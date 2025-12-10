@@ -14,9 +14,9 @@ export const siteConfig = {
 
     // Social media
     social: {
-        facebook: 'https://facebook.com/mesajdelamosu',
-        instagram: 'https://instagram.com/mesajdelamosu',
-        tiktok: 'https://tiktok.com/@mesajdelamosu',
+        facebook: '#', //'https://facebook.com/mesajdelamosu',
+        instagram: '#', //'https://instagram.com/mesajdelamosu',
+        tiktok: '#', //'https://tiktok.com/@mesajdelamosu',
     },
 
     // Program de lucru

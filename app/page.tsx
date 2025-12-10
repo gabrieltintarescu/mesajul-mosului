@@ -364,7 +364,7 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 bg-white relative">
+      <section id="cum-functioneaza" className="py-24 bg-white relative">
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
@@ -505,7 +505,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-24 bg-gradient-to-b from-green-50 to-white relative">
+      <section id="recenzii" className="py-24 bg-gradient-to-b from-green-50 to-white relative">
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-christmas">
@@ -563,7 +563,7 @@ export default function Home() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="pt-0 md:pt-12 pb-24 bg-gradient-to-b from-white to-red-50 relative">
+      <section id="preturi" className="pt-0 md:pt-12 pb-24 bg-gradient-to-b from-white to-red-50 relative">
         <div className="container mx-auto px-4">
           <MotionFadeIn className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-christmas-red/10 text-christmas-red mb-6">

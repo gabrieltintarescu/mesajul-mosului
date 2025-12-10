@@ -18,10 +18,10 @@ export function Footer() {
 
     const footerLinks = {
         product: [
-            { label: 'Cum Funcționează', href: '/#how-it-works' },
-            { label: 'Prețuri', href: '/#pricing' },
+            { label: 'Cum Funcționează', href: '/#cum-functioneaza' },
+            { label: 'Prețuri', href: '/#preturi' },
             { label: 'Video Demo', href: '/#demo' },
-            { label: 'Recenzii', href: '/#testimonials' },
+            { label: 'Recenzii', href: '/#recenzii' },
         ],
         support: [
             { label: 'Întrebări Frecvente', href: '/intrebari-frecvente' },
@@ -29,8 +29,8 @@ export function Footer() {
             { label: 'Ajutor', href: '/help' },
         ],
         legal: [
-            { label: 'Politica de Confidențialitate', href: '/privacy' },
-            { label: 'Termeni și Condiții', href: '/terms' },
+            { label: 'Politica de Confidențialitate', href: '/confidentialitate' },
+            { label: 'Termeni și Condiții', href: '/termeni' },
             { label: 'Politica Cookie-uri', href: '/cookies' },
         ],
     };

@@ -302,12 +302,12 @@ export default function CookiesPage() {
                                 <h2 className="text-xl font-bold text-gray-900 mb-4">📚 Documente Conexe</h2>
                                 <ul className="list-none space-y-2">
                                     <li>
-                                        <Link href="/privacy" className="text-christmas-red hover:underline">
+                                        <Link href="/confidentialitate" className="text-christmas-red hover:underline">
                                             → Politica de Confidențialitate
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="/terms" className="text-christmas-red hover:underline">
+                                        <Link href="/termeni" className="text-christmas-red hover:underline">
                                             → Termeni și Condiții
                                         </Link>
                                     </li>

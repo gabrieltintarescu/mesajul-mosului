@@ -29,9 +29,9 @@ export function Header({ variant = 'default' }: HeaderProps) {
     const useDarkText = variant === 'light' || isScrolled;
 
     const navLinks = [
-        { href: '/#how-it-works', label: 'Instrucțiuni' },
-        { href: '/#testimonials', label: 'Recenzii' },
-        { href: '/#pricing', label: 'Prețuri' },
+        { href: '/#cum-functioneaza', label: 'Instrucțiuni' },
+        { href: '/#recenzii', label: 'Recenzii' },
+        { href: '/#preturi', label: 'Prețuri' },
     ];
 
     return (

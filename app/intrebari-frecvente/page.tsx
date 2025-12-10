@@ -33,7 +33,7 @@ const faqCategories = [
             },
             {
                 question: 'Cât durează videoclipul?',
-                answer: 'Fiecare videoclip are o durată de aproximativ 45-60 de secunde, suficient pentru a transmite un mesaj cald și personalizat.',
+                answer: 'Fiecare videoclip are o durată de aproximativ 1-3 minute, suficient pentru a transmite un mesaj cald și personalizat.',
             },
         ],
     },
@@ -52,11 +52,7 @@ const faqCategories = [
             {
                 question: 'Pot primi factură?',
                 answer: 'Da! În pasul 2 al comenzii poți solicita factură completând datele de facturare (nume/firmă, CUI dacă este cazul, adresă).',
-            },
-            {
-                question: 'Există garanție de returnare a banilor?',
-                answer: 'Da, oferim garanție 100% satisfacție. Dacă nu ești mulțumit de videoclip, contactează-ne și îți vom returna banii sau vom reface videoclipul.',
-            },
+            }
         ],
     },
     {
