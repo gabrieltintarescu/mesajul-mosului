@@ -14,8 +14,8 @@ export const metadata: Metadata = {
     default: "Mesajul Moșului - Mesaje Video Personalizate de la Moș Crăciun",
     template: "%s | Mesajul Moșului",
   },
-  description: "Creează mesaje video magice, personalizate cu ajutorul AI de la Moș Crăciun pentru copilul tău. Fă acest Crăciun de neuitat cu un video în care Moșul îl strigă pe copil pe nume!",
-  keywords: ["video Moș Crăciun", "mesaj personalizat Santa", "cadou de Crăciun", "AI Moș Crăciun", "video personalizat"],
+  description: "Creează mesaje video magice, personalizate de la Moș Crăciun pentru copilul tău. Fă acest Crăciun de neuitat cu un video în care Moșul îl strigă pe copil pe nume!",
+  keywords: ["video Moș Crăciun", "mesaj personalizat Santa", "cadou de Crăciun", "Moș Crăciun", "video personalizat"],
   authors: [{ name: "Mesajul Moșului" }],
   icons: {
     icon: "/santaicon2.png",

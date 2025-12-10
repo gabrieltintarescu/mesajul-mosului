@@ -54,7 +54,7 @@ export function Header({ variant = 'default' }: HeaderProps) {
                         >
                             <Image
                                 src="/santaicon2.png"
-                                alt="Santa AI Logo"
+                                alt="Santa Logo"
                                 width={40}
                                 height={40}
                                 className="h-10 w-auto"

@@ -51,7 +51,7 @@ export function Footer() {
                         <Link href="/" className="inline-flex items-center gap-2 mb-4">
                             <Image
                                 src="/santaicon2.png"
-                                alt="Santa AI Logo"
+                                alt="Santa Logo"
                                 width={40}
                                 height={40}
                                 className="h-10 w-auto"
