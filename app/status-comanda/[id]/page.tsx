@@ -17,6 +17,7 @@ import { Footer, Header } from '@/components/layout';
 import { VideoPlayer } from '@/components/sections';
 import { CTAButton, LoaderAnimation, StatusBadge } from '@/components/ui';
 import { useOrderStatus } from '@/hooks';
+import { siteConfig } from '@/lib/config';
 import { useWizardStore } from '@/store';
 import { OrderStatus } from '@/types';
 
@@ -357,8 +358,8 @@ export default function OrderStatusPage() {
                         <div className="mt-8 text-center text-sm text-gray-500">
                             <p>
                                 Întrebări? Contactează-ne la{' '}
-                                <a href="mailto:contact@mesajul-mosului.ro" className="text-christmas-red hover:underline">
-                                    contact@mesajul-mosului.ro
+                                <a href={`mailto:${siteConfig.contact.email}`} className="text-christmas-red hover:underline">
+                                    {siteConfig.contact.email}
                                 </a>
                             </p>
                         </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { siteConfig } from '@/lib/config';
 import { motion } from 'framer-motion';
 import {
     Facebook,
@@ -23,7 +24,7 @@ export function Footer() {
             { label: 'Recenzii', href: '/#testimonials' },
         ],
         support: [
-            { label: 'Întrebări Frecvente', href: '/faq' },
+            { label: 'Întrebări Frecvente', href: '/intrebari-frecvente' },
             { label: 'Contact', href: '/contact' },
             { label: 'Ajutor', href: '/help' },
         ],
@@ -35,9 +36,9 @@ export function Footer() {
     };
 
     const socialLinks = [
-        { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
-        { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
-        { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
+        { icon: Facebook, href: siteConfig.social.facebook, label: 'Facebook' },
+        { icon: Instagram, href: siteConfig.social.instagram, label: 'Instagram' },
+        { icon: Twitter, href: siteConfig.social.twitter, label: 'Twitter' },
     ];
 
     return (
@@ -122,20 +123,20 @@ export function Footer() {
                         <ul className="space-y-3">
                             <li>
                                 <a
-                                    href="mailto:contact@mesajul-mosului.ro"
+                                    href={`mailto:${siteConfig.contact.email}`}
                                     className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
                                 >
                                     <Mail className="w-4 h-4" />
-                                    contact@mesajul-mosului.ro
+                                    {siteConfig.contact.email}
                                 </a>
                             </li>
                             <li>
                                 <a
-                                    href="tel:+40751954687"
+                                    href={`tel:${siteConfig.contact.phoneInternational}`}
                                     className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
                                 >
                                     <Phone className="w-4 h-4" />
-                                    0751954687
+                                    {siteConfig.contact.phone}
                                 </a>
                             </li>
                         </ul>

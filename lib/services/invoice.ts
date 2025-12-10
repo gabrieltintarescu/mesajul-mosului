@@ -1,3 +1,4 @@
+import { siteConfig } from '@/lib/config';
 import { InvoicingDetails, OrderRow } from '@/lib/supabase/database.types';
 import { jsPDF } from 'jspdf';
 
@@ -100,7 +101,7 @@ export async function generateInvoicePdf(order: OrderRow): Promise<Buffer> {
     y += 5;
     doc.text('Bucuresti, Romania', margin, y);
     y += 5;
-    doc.text('contact@mesajul-mosului.ro', margin, y);
+    doc.text(siteConfig.contact.email, margin, y);
 
     // Customer info (right)
     const customerX = pageWidth / 2 + 10;
