@@ -28,13 +28,13 @@ Detalii despre copil:
 - Nume: ${childDetails.name}
 - Vârstă: ${childDetails.age} ani
 - Gen: ${childDetails.gender === 'boy' ? 'băiat' : 'fată'}
-- Realizările din acest an: ${childDetails.achievements}
+- Mesaj de la părinți (realizări, sfaturi, sau lucruri de îmbunătățit): ${childDetails.achievements}
 - Lucruri preferate: ${childDetails.favoriteThings}
 - Comportament: ${genderArticle} ${behaviorText}
 
 Instrucțiuni:
 1. Începe cu un salut cald "Ho ho ho!" și adresează-te copilului pe nume
-2. Menționează că l-ai urmărit de la Polul Nord și ești mândru de realizările sale
+2. Menționează că l-ai urmărit de la Polul Nord și integrează mesajul de la părinți într-un mod cald (laudă realizările, oferă sfaturi blânde pentru îmbunătățiri)
 3. Referă-te la lucrurile preferate pentru a face mesajul personal
 4. Recunoaște comportamentul într-un mod pozitiv și încurajator
 5. Creează entuziasm pentru Crăciun

@@ -37,7 +37,7 @@ export function Step1Form() {
         }
 
         if (!childDetails.achievements?.trim()) {
-            newErrors.achievements = 'Te rugăm să menționezi cel puțin o realizare';
+            newErrors.achievements = 'Te rugăm să scrii ce vrei să-i spună Moșul copilului';
         }
 
         if (!childDetails.favoriteThings?.trim()) {
@@ -143,15 +143,15 @@ export function Step1Form() {
                         helperText="Nu-ți face griji, Moș Crăciun e mereu blând și încurajator!"
                     />
 
-                    {/* Achievements */}
+                    {/* Achievements / Message for Santa */}
                     <div className="relative">
                         <TextAreaField
-                            label="Realizările Din Acest An"
-                            placeholder="Ex: a învățat să meargă pe bicicletă, a luat note bune, a ajutat la treburile casnice, și-a făcut prieteni noi..."
+                            label="Ce Să-i Spună Moș Crăciun?"
+                            placeholder="Ex: a învățat să meargă pe bicicletă, a luat note bune, uneori nu și-a făcut temele, să fie mai ordonat, să asculte de părinți..."
                             value={childDetails.achievements || ''}
                             onChange={(e) => setChildDetails({ achievements: e.target.value })}
                             error={errors.achievements}
-                            helperText="Moș Crăciun îl va felicita pe copil pentru aceste realizări!"
+                            helperText="Scrie realizări, sfaturi, sau ce vrei să menționeze Moșul (realizări, greșeli de corectat, încurajări)"
                             required
                         />
                         <Star className="absolute right-4 top-2 w-4 h-4 text-christmas-gold" />

@@ -77,7 +77,7 @@ export default function Home() {
     {
       icon: MessageCircle,
       title: 'Scenariu Personalizat',
-      description: 'Moș Crăciun îl strigă pe copilul tău pe nume, îi laudă realizările și vorbește despre lucrurile lui preferate.',
+      description: 'Moș Crăciun îl strigă pe copilul tău pe nume și transmite mesajul tău într-un mod magic.',
     },
     {
       icon: Video,
@@ -110,7 +110,7 @@ export default function Home() {
     {
       step: 1,
       title: 'Spune-ne Despre Copil',
-      description: 'Completează numele, vârsta, realizările și lucrurile preferate.',
+      description: 'Completează numele, vârsta și ce vrei să-i transmită Moșul.',
       icon: '✏️',
     },
     {
