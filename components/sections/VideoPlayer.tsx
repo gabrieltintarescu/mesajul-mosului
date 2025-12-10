@@ -1,8 +1,17 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Download, Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import {
+    AlertCircle,
+    Download,
+    Maximize,
+    Pause,
+    Play,
+    RefreshCw,
+    Volume2,
+    VolumeX
+} from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 interface VideoPlayerProps {
     src: string;
@@ -12,19 +21,72 @@ interface VideoPlayerProps {
 
 export function VideoPlayer({ src, poster, title }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [progress, setProgress] = useState(0);
     const [showControls, setShowControls] = useState(true);
+    const [videoError, setVideoError] = useState<string | null>(null);
+    const [isRetrying, setIsRetrying] = useState(false);
+    const [retryCount, setRetryCount] = useState(0);
 
-    const togglePlay = () => {
+    const maxRetries = 5;
+    const retryDelay = 3000; // 3 seconds
+
+    // Reset error state when src changes
+    useEffect(() => {
+        setVideoError(null);
+        setRetryCount(0);
+    }, [src]);
+
+    const handleVideoError = useCallback(() => {
+        if (retryCount < maxRetries) {
+            setVideoError('Se încarcă videoclipul...');
+            setIsRetrying(true);
+
+            // Auto-retry after delay
+            setTimeout(() => {
+                if (videoRef.current) {
+                    setRetryCount(prev => prev + 1);
+                    videoRef.current.load();
+                    setIsRetrying(false);
+                }
+            }, retryDelay);
+        } else {
+            setVideoError('Videoclipul nu poate fi redat momentan. Încearcă din nou în câteva secunde.');
+            setIsRetrying(false);
+        }
+    }, [retryCount]);
+
+    const handleRetry = () => {
+        setVideoError(null);
+        setRetryCount(0);
+        setIsRetrying(true);
         if (videoRef.current) {
-            if (isPlaying) {
-                videoRef.current.pause();
-            } else {
-                videoRef.current.play();
+            videoRef.current.load();
+            setTimeout(() => setIsRetrying(false), 1000);
+        }
+    };
+
+    const handleCanPlay = () => {
+        setVideoError(null);
+        setIsRetrying(false);
+    };
+
+    const togglePlay = async () => {
+        if (videoRef.current) {
+            try {
+                if (isPlaying) {
+                    videoRef.current.pause();
+                    setIsPlaying(false);
+                } else {
+                    await videoRef.current.play();
+                    setIsPlaying(true);
+                }
+            } catch (error) {
+                console.error('Error playing video:', error);
+                handleVideoError();
             }
-            setIsPlaying(!isPlaying);
         }
     };
 
@@ -50,18 +112,49 @@ export function VideoPlayer({ src, poster, title }: VideoPlayerProps) {
         }
     };
 
-    const handleFullscreen = () => {
-        if (videoRef.current) {
+    const handleFullscreen = async () => {
+        const container = containerRef.current;
+        const video = videoRef.current;
+
+        if (!container && !video) return;
+
+        try {
+            // Check if already in fullscreen
             if (document.fullscreenElement) {
-                document.exitFullscreen();
-            } else {
-                videoRef.current.requestFullscreen();
+                await document.exitFullscreen();
+                return;
             }
+
+            // Try container first, then video element
+            const element = container || video;
+
+            if (element) {
+                // Standard API
+                if (element.requestFullscreen) {
+                    await element.requestFullscreen();
+                }
+                // Safari on iOS - use webkitEnterFullscreen on video element
+                else if (video && 'webkitEnterFullscreen' in video) {
+                    (video as HTMLVideoElement & { webkitEnterFullscreen: () => void }).webkitEnterFullscreen();
+                }
+                // Older Safari
+                else if ('webkitRequestFullscreen' in element) {
+                    (element as HTMLElement & { webkitRequestFullscreen: () => void }).webkitRequestFullscreen();
+                }
+                // MS Edge legacy
+                else if ('msRequestFullscreen' in element) {
+                    (element as HTMLElement & { msRequestFullscreen: () => void }).msRequestFullscreen();
+                }
+            }
+        } catch (error) {
+            // Fullscreen not supported or blocked - fail silently
+            console.warn('Fullscreen not available:', error);
         }
     };
 
     return (
         <motion.div
+            ref={containerRef}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="relative rounded-2xl overflow-hidden bg-black shadow-2xl group"
@@ -77,10 +170,43 @@ export function VideoPlayer({ src, poster, title }: VideoPlayerProps) {
                 onTimeUpdate={handleTimeUpdate}
                 onEnded={() => setIsPlaying(false)}
                 onClick={togglePlay}
+                onError={handleVideoError}
+                onCanPlay={handleCanPlay}
+                playsInline
+                preload="auto"
             />
 
+            {/* Error overlay */}
+            {videoError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+                    <div className="text-center p-6">
+                        {isRetrying ? (
+                            <>
+                                <RefreshCw className="w-12 h-12 text-white/60 mx-auto mb-4 animate-spin" />
+                                <p className="text-white/80 text-sm">{videoError}</p>
+                                <p className="text-white/50 text-xs mt-2">
+                                    Încercare {retryCount + 1} din {maxRetries}
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+                                <p className="text-white/80 text-sm mb-4">{videoError}</p>
+                                <button
+                                    onClick={handleRetry}
+                                    className="px-4 py-2 bg-christmas-red text-white rounded-lg hover:bg-christmas-red/80 transition-colors flex items-center gap-2 mx-auto"
+                                >
+                                    <RefreshCw className="w-4 h-4" />
+                                    Încearcă din nou
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Play button overlay */}
-            {!isPlaying && (
+            {!isPlaying && !videoError && (
                 <motion.button
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
