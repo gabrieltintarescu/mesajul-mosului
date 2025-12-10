@@ -277,6 +277,91 @@ export default function OrderStatusPage() {
                             </motion.div>
                         )}
 
+                        {/* Failed Order Message */}
+                        {isFailed && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                                className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 mb-8"
+                            >
+                                <div className="text-center">
+                                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <AlertCircle className="w-8 h-8 text-red-500" />
+                                    </div>
+
+                                    <h2 className="text-xl font-bold text-gray-900 mb-2">
+                                        Ne pare rău, a apărut o problemă
+                                    </h2>
+
+                                    <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                                        Din păcate, nu am putut genera videoclipul tău.
+                                        Nu îți face griji - echipa noastră de suport te va ajuta să rezolvi problema.
+                                    </p>
+
+                                    {order.errorMessage && (
+                                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-left max-w-md mx-auto">
+                                            <p className="text-sm text-red-800">
+                                                <strong>Detalii eroare:</strong> {order.errorMessage}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    <div className="bg-gray-50 rounded-xl p-6 max-w-md mx-auto">
+                                        <h3 className="font-semibold text-gray-900 mb-4">
+                                            📞 Contactează Suportul
+                                        </h3>
+
+                                        <div className="space-y-3 text-sm">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <span className="text-gray-500">Email:</span>
+                                                <a
+                                                    href={`mailto:${siteConfig.contact.email}?subject=Problemă comandă ${orderId}&body=Bună ziua,%0D%0A%0D%0AAm o problemă cu comanda mea.%0D%0A%0D%0AID Comandă: ${orderId}%0D%0AEmail: ${order.email}%0D%0ANume copil: ${order.childDetails.name}%0D%0A%0D%0AEroare: ${order.errorMessage || 'N/A'}%0D%0A%0D%0AVă mulțumesc!`}
+                                                    className="text-christmas-red hover:underline font-medium"
+                                                >
+                                                    {siteConfig.contact.email}
+                                                </a>
+                                            </div>
+
+                                            <div className="flex items-center justify-center gap-2">
+                                                <span className="text-gray-500">Telefon:</span>
+                                                <a
+                                                    href={`tel:${siteConfig.contact.phoneInternational}`}
+                                                    className="text-christmas-red hover:underline font-medium"
+                                                >
+                                                    {siteConfig.contact.phone}
+                                                </a>
+                                            </div>
+
+                                            <div className="flex items-center justify-center gap-2">
+                                                <span className="text-gray-500">WhatsApp:</span>
+                                                <a
+                                                    href={`https://wa.me/${siteConfig.contact.whatsapp}?text=Bună! Am o problemă cu comanda ${orderId}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-christmas-red hover:underline font-medium"
+                                                >
+                                                    Scrie-ne pe WhatsApp
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <p className="text-xs text-gray-500 mt-4">
+                                            Menționează ID-ul comenzii: <code className="bg-gray-200 px-1 rounded">{orderId}</code>
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-6">
+                                        <Link href="/">
+                                            <CTAButton variant="outline" icon={<Home className="w-5 h-5" />}>
+                                                Înapoi Acasă
+                                            </CTAButton>
+                                        </Link>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
                         {/* Video Player (when completed) */}
                         {isCompleted && order.videoUrl && (
                             <motion.div
