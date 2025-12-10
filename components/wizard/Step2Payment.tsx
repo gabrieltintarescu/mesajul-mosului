@@ -141,8 +141,8 @@ export function Step2Payment() {
                 // Redirect to Stripe Checkout
                 window.location.href = checkoutResponse.data.url;
             } else {
-                // Check if it's an already paid error - redirect to order page
-                if (checkoutResponse.error === 'Order has already been paid') {
+                // Check if it's an already paid error - redirect to order status page
+                if (checkoutResponse.alreadyPaid) {
                     router.push(`/status-comanda/${orderId}?email=${encodeURIComponent(email)}`);
                 } else {
                     setPaymentError(checkoutResponse.error || 'Eroare la crearea sesiunii de plată');

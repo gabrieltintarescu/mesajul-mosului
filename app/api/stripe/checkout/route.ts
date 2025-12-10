@@ -35,14 +35,51 @@ export async function POST(request: Request) {
         // Prevent checkout for already paid orders
         if (order.status !== 'pending_payment') {
             return NextResponse.json(
-                { success: false, error: 'Comanda a fost deja plătită' },
+                { success: false, error: 'Comanda a fost deja plătită', alreadyPaid: true },
                 { status: 400 }
             );
         }
 
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-        // Create Stripe checkout session
+        // Check if there's an existing valid checkout session
+        if (order.stripe_checkout_session_id) {
+            try {
+                const existingSession = await stripe.checkout.sessions.retrieve(
+                    order.stripe_checkout_session_id
+                );
+
+                // If session is still open and not expired, reuse it
+                if (existingSession.status === 'open' && existingSession.url) {
+                    console.log(`Reusing existing checkout session for order ${order.id}`);
+                    return NextResponse.json({
+                        success: true,
+                        data: {
+                            sessionId: existingSession.id,
+                            url: existingSession.url,
+                        },
+                    });
+                }
+
+                // If session was completed (paid), double-check order status
+                if (existingSession.status === 'complete') {
+                    // Payment was already made, update order status if needed
+                    console.log(`Checkout session already completed for order ${order.id}`);
+                    return NextResponse.json(
+                        { success: false, error: 'Comanda a fost deja plătită', alreadyPaid: true },
+                        { status: 400 }
+                    );
+                }
+
+                // Session expired or cancelled, create a new one
+                console.log(`Existing session ${existingSession.status}, creating new one for order ${order.id}`);
+            } catch (sessionError) {
+                // Session not found or error, create a new one
+                console.log(`Could not retrieve existing session, creating new one for order ${order.id}`, sessionError);
+            }
+        }
+
+        // Create new Stripe checkout session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'payment',

@@ -246,7 +246,7 @@ export async function getOrderStatus(
  */
 export async function createCheckoutSession(
     orderId: string
-): Promise<ApiResponse<{ sessionId: string; url: string }>> {
+): Promise<ApiResponse<{ sessionId: string; url: string }> & { alreadyPaid?: boolean }> {
     try {
         const response = await fetch('/api/stripe/checkout', {
             method: 'POST',
@@ -262,6 +262,7 @@ export async function createCheckoutSession(
             return {
                 success: false,
                 error: result.error || 'Failed to create checkout session',
+                alreadyPaid: result.alreadyPaid || false,
             };
         }
 
