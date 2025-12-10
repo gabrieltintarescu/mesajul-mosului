@@ -223,7 +223,7 @@ export default function TermsPage() {
                                     evenimente de forță majoră, inclusiv, dar fără a se limita la: dezastre
                                     naturale, războaie, acte de terorism, greve, întreruperi ale serviciilor
                                     de internet sau electricitate, defecțiuni ale serviciilor terțe pe care
-                                    ne bazăm (Stripe, Resend, HeyGen, etc.).
+                                    ne bazăm.
                                 </p>
                             </div>
 
