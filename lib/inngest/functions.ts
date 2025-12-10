@@ -142,7 +142,7 @@ export const videoGenerationJob = inngest.createFunction(
 
         // Step 4: Poll for HeyGen completion using proper step.sleep() pattern
         // This allows Inngest to properly manage retries and doesn't block execution time
-        const maxAttempts = 60; // 10 minutes with 10 second intervals
+        const maxAttempts = 80; // 10 minutes with 10 second intervals
         let heygenVideoUrl: string | null = null;
 
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -174,7 +174,7 @@ export const videoGenerationJob = inngest.createFunction(
 
             // Use step.sleep for proper waiting - this doesn't consume execution time
             // and allows the function to be resumed correctly after sleep
-            await step.sleep(`wait-for-heygen-${attempt}`, '30s');
+            await step.sleep(`wait-for-heygen-${attempt}`, '180s');
         }
 
         if (!heygenVideoUrl) {
