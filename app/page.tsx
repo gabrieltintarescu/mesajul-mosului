@@ -585,7 +585,7 @@ export default function Home() {
               originalPrice={129}
               isPopular
               features={[
-                'Video personalizat de 5-7 minute',
+                'Video personalizat de 2-3 minute',
                 'Calitate HD (1080p)',
                 'Scenariu cu numele copilului',
                 'Menționează realizările și preferințele',

@@ -141,16 +141,7 @@ const guides = [
                     'Răspundem în maxim 24 de ore',
                     'Rambursările se procesează în 5-10 zile lucrătoare',
                 ],
-            },
-            {
-                title: 'Politica de rambursare',
-                steps: [
-                    'Oferim rambursare 100% dacă nu ești mulțumit',
-                    'Poți cere și regenerarea videoclipului gratuit',
-                    'Rambursările se fac în aceeași metodă de plată',
-                    'Contactează-ne în maxim 30 de zile de la comandă',
-                ],
-            },
+            }
         ],
     },
     {

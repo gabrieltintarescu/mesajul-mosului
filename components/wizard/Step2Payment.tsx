@@ -165,7 +165,7 @@ export function Step2Payment() {
     };
 
     const features = [
-        'Video personalizat de 5-7 minute',
+        'Video personalizat de 2-3 minute',
         'Descărcare în calitate HD',
         'Livrat în 15 minute',
         'Vizionări nelimitate',
