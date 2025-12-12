@@ -11,13 +11,14 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Footer, Header } from '@/components/layout';
 import { VideoPlayer } from '@/components/sections';
 import { CTAButton, LoaderAnimation, StatusBadge } from '@/components/ui';
 import { useOrderStatus } from '@/hooks';
 import { siteConfig } from '@/lib/config';
+import { ttqPurchase } from '@/lib/tiktok';
 import { useWizardStore } from '@/store';
 import { OrderStatus } from '@/types';
 
@@ -53,6 +54,7 @@ export default function OrderStatusPage() {
     // Use email from store first, then URL, then localStorage fallback
     const [email, setEmail] = useState<string | null>(null);
     const [isHydrated, setIsHydrated] = useState(false);
+    const purchaseTrackedRef = useRef(false);
 
     useEffect(() => {
         setIsHydrated(true);
@@ -71,6 +73,15 @@ export default function OrderStatusPage() {
     }, [storeEmail, urlEmail, orderId, paymentSuccess, reset]);
 
     const { order, isLoading, error, mutate } = useOrderStatus(orderId, email);
+
+    // Track Purchase event when payment is successful (only once)
+    useEffect(() => {
+        if (paymentSuccess && order && !purchaseTrackedRef.current) {
+            purchaseTrackedRef.current = true;
+            const priceInLei = (order.finalPrice || (siteConfig.pricing.basePrice * 100)) / 100;
+            ttqPurchase(priceInLei, 'RON', orderId);
+        }
+    }, [paymentSuccess, order, orderId]);
 
     const currentStepIndex = order ? getStepIndex(order.status) : 0;
     const isCompleted = order?.status === 'completed';

@@ -12,6 +12,14 @@ export const siteConfig = {
         whatsapp: '40750253850', // fără + pentru link wa.me
     },
 
+    // Prețuri (în RON)
+    pricing: {
+        basePrice: 79, // Prețul actual după reducerea de sărbători
+        originalPrice: 129, // Prețul original (pentru afișare)
+        holidayDiscount: 50, // Reducerea de sărbători
+        currency: 'RON',
+    },
+
     // Social media
     social: {
         facebook: '#', //'https://facebook.com/mesajdelamosu',

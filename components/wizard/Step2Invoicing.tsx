@@ -2,6 +2,7 @@
 
 import { CTAButton, InputField } from '@/components/ui';
 import { initiateOrder } from '@/lib/api';
+import { ttqAddToCart, ttqCompleteRegistration } from '@/lib/tiktok';
 import { useWizardStore } from '@/store';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Building2, FileText, User } from 'lucide-react';
@@ -108,6 +109,12 @@ export function Step2Invoicing() {
             if (response.success && response.data) {
                 setOrderId(response.data.orderId);
                 setOrderFinalPriceCents(response.data.finalPrice);
+
+                // Track AddToCart and CompleteRegistration when order is created
+                const priceInLei = response.data.finalPrice / 100;
+                ttqAddToCart(priceInLei);
+                ttqCompleteRegistration(priceInLei);
+
                 router.push('/comanda/pas-3');
             } else {
                 setSubmitError(response.error || 'A apărut o eroare. Te rugăm să încerci din nou.');

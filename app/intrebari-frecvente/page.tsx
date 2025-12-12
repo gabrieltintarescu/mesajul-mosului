@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { Footer, Header } from '@/components/layout';
 import { SnowfallBackground } from '@/components/sections';
 import { CTAButton } from '@/components/ui';
+import { siteConfig } from '@/lib/config';
 
 interface FAQItem {
     question: string;
@@ -43,7 +44,7 @@ const faqCategories = [
         items: [
             {
                 question: 'Cât costă un videoclip?',
-                answer: 'Prețul standard este de 89 Lei pentru un videoclip complet personalizat. Acceptăm și coduri de cupon pentru reduceri.',
+                answer: `Prețul standard este de ${siteConfig.pricing.basePrice} Lei pentru un videoclip complet personalizat. Acceptăm și coduri de cupon pentru reduceri.`,
             },
             {
                 question: 'Ce metode de plată acceptați?',

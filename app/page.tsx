@@ -16,7 +16,10 @@ import {
   Zap
 } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
+
+import { siteConfig } from '@/lib/config';
+import { ttqViewContent } from '@/lib/tiktok';
 
 import { FeatureCard, Footer, Header, PricingBox } from '@/components/layout';
 import { SnowfallBackground } from '@/components/sections';
@@ -39,6 +42,11 @@ function getDaysUntilChristmas(): number {
 
 export default function Home() {
   const daysUntilChristmas = useMemo(() => getDaysUntilChristmas(), []);
+
+  // Track ViewContent on page load
+  useEffect(() => {
+    ttqViewContent(siteConfig.pricing.basePrice);
+  }, []);
 
   const testimonials = [
     {
@@ -204,7 +212,7 @@ export default function Home() {
                   icon={<Sparkles className="w-5 h-5" />}
                   className="animate-pulse-glow"
                 >
-                  Creează videoclipul - 89 Lei
+                  Creează videoclipul - {siteConfig.pricing.basePrice} Lei
                 </CTAButton>
               </Link>
 

@@ -2,6 +2,8 @@
 
 import { CTAButton } from '@/components/ui';
 import { applyCouponToOrder, createCheckoutSession, getOrderStatus, removeCouponFromOrder } from '@/lib/api';
+import { siteConfig } from '@/lib/config';
+import { ttqAddPaymentInfo, ttqPlaceAnOrder } from '@/lib/tiktok';
 import { useWizardStore } from '@/store';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Check, CreditCard, Lock, Shield, Tag } from 'lucide-react';
@@ -53,6 +55,9 @@ export function Step2Payment() {
                         discountAmountCents: order.discountAmount || 0,
                         couponCode: order.couponCode ?? null,
                     });
+
+                    // Track AddPaymentInfo when user lands on payment page
+                    ttqAddPaymentInfo(order.finalPrice / 100);
                 }
             } catch (error) {
                 console.error('Error fetching order:', error);
@@ -65,16 +70,16 @@ export function Step2Payment() {
     }, [orderId, email, router]);
 
     // Calculate display price - use order's actual price or stored price
-    const finalPriceCents = orderPricing?.finalPriceCents ?? orderFinalPriceCents ?? 8900;
+    const finalPriceCents = orderPricing?.finalPriceCents ?? orderFinalPriceCents ?? (siteConfig.pricing.basePrice * 100);
     const totalPriceLei = finalPriceCents / 100;
     const couponDiscountLei = (orderPricing?.discountAmountCents ?? 0) / 100;
     const couponCode = orderPricing?.couponCode;
 
-    // Marketing: Show original price as 129 Lei with 40 Lei holiday discount
-    const marketingOriginalPrice = 129;
-    const holidayDiscount = 40;
+    // Marketing: Show original price with holiday discount
+    const marketingOriginalPrice = siteConfig.pricing.originalPrice;
+    const holidayDiscount = siteConfig.pricing.holidayDiscount;
     // The base price after holiday discount (what we actually charge before coupons)
-    const basePriceAfterHoliday = marketingOriginalPrice - holidayDiscount; // 89 Lei
+    const basePriceAfterHoliday = marketingOriginalPrice - holidayDiscount;
 
     const handleApplyDiscount = async () => {
         if (!discountCode.trim()) {
@@ -140,6 +145,9 @@ export function Step2Payment() {
 
         setIsProcessing(true);
         setPaymentError('');
+
+        // Track PlaceAnOrder when user clicks pay button
+        ttqPlaceAnOrder(totalPriceLei);
 
         try {
             // Create Stripe checkout session
