@@ -17,6 +17,7 @@ import { Footer, Header } from '@/components/layout';
 import { VideoPlayer } from '@/components/sections';
 import { CTAButton, LoaderAnimation, StatusBadge } from '@/components/ui';
 import { useOrderStatus } from '@/hooks';
+import { siteConfig } from '@/lib/config';
 import { useWizardStore } from '@/store';
 import { OrderStatus } from '@/types';
 
