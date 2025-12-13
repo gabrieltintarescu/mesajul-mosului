@@ -5,14 +5,18 @@
  * Events are only fired in production or when the pixel is loaded.
  */
 
+// TikTok Pixel interface - ttq is an array-like object with methods attached
+interface TikTokPixel {
+    track: (event: string, data?: Record<string, unknown>) => void;
+    identify: (data: Record<string, unknown>) => void;
+    page: () => void;
+    push: (args: unknown[]) => void;
+}
+
 // Extend Window interface for TikTok Pixel
 declare global {
     interface Window {
-        ttq?: {
-            track: (event: string, data?: Record<string, unknown>) => void;
-            identify: (data: Record<string, unknown>) => void;
-            page: () => void;
-        };
+        ttq?: TikTokPixel;
     }
 }
 
@@ -24,9 +28,54 @@ async function sha256(message: string): Promise<string> {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Check if TikTok Pixel is available
-function isTTQAvailable(): boolean {
-    return typeof window !== 'undefined' && !!window.ttq;
+// Check if we're in a browser environment
+function isBrowser(): boolean {
+    return typeof window !== 'undefined';
+}
+
+// Get TikTok Pixel instance safely
+function getTTQ(): TikTokPixel | null {
+    if (!isBrowser()) return null;
+
+    const ttq = window.ttq;
+    if (!ttq) {
+        if (process.env.NODE_ENV === 'development') {
+            console.warn('[TikTok Pixel] ttq not found on window');
+        }
+        return null;
+    }
+
+    return ttq;
+}
+
+// Safe track function that handles both queued and loaded states
+function safeTrack(event: string, data?: Record<string, unknown>): void {
+    const ttq = getTTQ();
+    if (!ttq) return;
+
+    try {
+        ttq.track(event, data);
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`[TikTok Pixel] Tracked: ${event}`, data);
+        }
+    } catch (error) {
+        console.error(`[TikTok Pixel] Error tracking ${event}:`, error);
+    }
+}
+
+// Safe identify function
+function safeIdentify(data: Record<string, string>): void {
+    const ttq = getTTQ();
+    if (!ttq) return;
+
+    try {
+        ttq.identify(data);
+        if (process.env.NODE_ENV === 'development') {
+            console.log('[TikTok Pixel] Identified user:', data);
+        }
+    } catch (error) {
+        console.error('[TikTok Pixel] Error identifying:', error);
+    }
 }
 
 // Product info for video service
@@ -44,7 +93,7 @@ export async function ttqIdentify(data: {
     phone?: string;
     externalId?: string;
 }): Promise<void> {
-    if (!isTTQAvailable()) return;
+    if (!isBrowser()) return;
 
     try {
         const identifyData: Record<string, string> = {};
@@ -62,10 +111,10 @@ export async function ttqIdentify(data: {
         }
 
         if (Object.keys(identifyData).length > 0) {
-            window.ttq?.identify(identifyData);
+            safeIdentify(identifyData);
         }
     } catch (error) {
-        console.error('TikTok identify error:', error);
+        console.error('[TikTok Pixel] Identify error:', error);
     }
 }
 
@@ -73,9 +122,7 @@ export async function ttqIdentify(data: {
  * Track ViewContent - When user views product page
  */
 export function ttqViewContent(value: number, currency = 'RON'): void {
-    if (!isTTQAvailable()) return;
-
-    window.ttq?.track('ViewContent', {
+    safeTrack('ViewContent', {
         contents: [PRODUCT],
         value,
         currency,
@@ -86,9 +133,7 @@ export function ttqViewContent(value: number, currency = 'RON'): void {
  * Track AddToCart - When user adds product (creates order)
  */
 export function ttqAddToCart(value: number, currency = 'RON'): void {
-    if (!isTTQAvailable()) return;
-
-    window.ttq?.track('AddToCart', {
+    safeTrack('AddToCart', {
         contents: [PRODUCT],
         value,
         currency,
@@ -99,9 +144,7 @@ export function ttqAddToCart(value: number, currency = 'RON'): void {
  * Track InitiateCheckout - When user starts checkout process
  */
 export function ttqInitiateCheckout(value: number, currency = 'RON'): void {
-    if (!isTTQAvailable()) return;
-
-    window.ttq?.track('InitiateCheckout', {
+    safeTrack('InitiateCheckout', {
         contents: [PRODUCT],
         value,
         currency,
@@ -112,9 +155,7 @@ export function ttqInitiateCheckout(value: number, currency = 'RON'): void {
  * Track AddPaymentInfo - When user is on payment page
  */
 export function ttqAddPaymentInfo(value: number, currency = 'RON'): void {
-    if (!isTTQAvailable()) return;
-
-    window.ttq?.track('AddPaymentInfo', {
+    safeTrack('AddPaymentInfo', {
         contents: [PRODUCT],
         value,
         currency,
@@ -125,9 +166,7 @@ export function ttqAddPaymentInfo(value: number, currency = 'RON'): void {
  * Track PlaceAnOrder - When user clicks pay button
  */
 export function ttqPlaceAnOrder(value: number, currency = 'RON'): void {
-    if (!isTTQAvailable()) return;
-
-    window.ttq?.track('PlaceAnOrder', {
+    safeTrack('PlaceAnOrder', {
         contents: [PRODUCT],
         value,
         currency,
@@ -138,9 +177,7 @@ export function ttqPlaceAnOrder(value: number, currency = 'RON'): void {
  * Track CompletePayment/Purchase - When payment is successful
  */
 export function ttqPurchase(value: number, currency = 'RON', orderId?: string): void {
-    if (!isTTQAvailable()) return;
-
-    window.ttq?.track('CompletePayment', {
+    safeTrack('CompletePayment', {
         contents: [{
             ...PRODUCT,
             content_id: orderId || PRODUCT.content_id,
@@ -154,9 +191,7 @@ export function ttqPurchase(value: number, currency = 'RON', orderId?: string): 
  * Track CompleteRegistration - When user completes form
  */
 export function ttqCompleteRegistration(value: number, currency = 'RON'): void {
-    if (!isTTQAvailable()) return;
-
-    window.ttq?.track('CompleteRegistration', {
+    safeTrack('CompleteRegistration', {
         contents: [PRODUCT],
         value,
         currency,
