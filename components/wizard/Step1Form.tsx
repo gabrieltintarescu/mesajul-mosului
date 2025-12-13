@@ -1,13 +1,11 @@
 'use client';
 
 import { CTAButton, InputField, SelectField, TextAreaField } from '@/components/ui';
-import { siteConfig } from '@/lib/config';
-import { ttqIdentify, ttqInitiateCheckout } from '@/lib/tiktok';
 import { useWizardStore } from '@/store';
 import { motion } from 'framer-motion';
 import { ArrowRight, Heart, Smile, Star, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 interface FormErrors {
     name?: string;
@@ -22,11 +20,6 @@ export function Step1Form() {
     const router = useRouter();
     const { childDetails, email, setChildDetails, setEmail } = useWizardStore();
     const [errors, setErrors] = useState<FormErrors>({});
-
-    // Track InitiateCheckout when user lands on step 1
-    useEffect(() => {
-        ttqInitiateCheckout(siteConfig.pricing.basePrice);
-    }, []);
 
     const validateForm = (): boolean => {
         const newErrors: FormErrors = {};
@@ -63,11 +56,6 @@ export function Step1Form() {
         e.preventDefault();
 
         if (!validateForm()) return;
-
-        // Identify user with email for better tracking
-        if (email) {
-            ttqIdentify({ email });
-        }
 
         // Store is already updated via onChange handlers
         // Navigate to step 2 for invoicing details

@@ -3,7 +3,6 @@
 import { CTAButton } from '@/components/ui';
 import { applyCouponToOrder, createCheckoutSession, getOrderStatus, removeCouponFromOrder } from '@/lib/api';
 import { siteConfig } from '@/lib/config';
-import { ttqAddPaymentInfo, ttqPlaceAnOrder } from '@/lib/tiktok';
 import { useWizardStore } from '@/store';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Check, CreditCard, Lock, Shield, Tag } from 'lucide-react';
@@ -55,9 +54,6 @@ export function Step2Payment() {
                         discountAmountCents: order.discountAmount || 0,
                         couponCode: order.couponCode ?? null,
                     });
-
-                    // Track AddPaymentInfo when user lands on payment page
-                    ttqAddPaymentInfo(order.finalPrice / 100);
                 }
             } catch (error) {
                 console.error('Error fetching order:', error);
@@ -145,9 +141,6 @@ export function Step2Payment() {
 
         setIsProcessing(true);
         setPaymentError('');
-
-        // Track PlaceAnOrder when user clicks pay button
-        ttqPlaceAnOrder(totalPriceLei);
 
         try {
             // Create Stripe checkout session
