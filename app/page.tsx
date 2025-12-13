@@ -583,8 +583,8 @@ export default function Home() {
           <div className="max-w-lg mx-auto">
             <PricingBox
               title="Pachetul Magia Craciunului"
-              price={89}
-              originalPrice={129}
+              price={siteConfig.pricing.basePrice}
+              originalPrice={siteConfig.pricing.originalPrice}
               isPopular
               features={[
                 'Video personalizat de 2-3 minute',
