@@ -3,11 +3,11 @@ import { NextResponse } from 'next/server';
 
 /**
  * Middleware to handle maintenance mode
- * Set APP_IS_ACTIVE=inactive in Vercel env vars to enable maintenance mode
- * Default is "active" (site is accessible)
+ * Set APP_IS_ACTIVE=false in Vercel env vars to enable maintenance mode
+ * Default is true (site is accessible)
  */
 export function middleware(request: NextRequest) {
-    const isActive = process.env.APP_IS_ACTIVE !== 'inactive';
+    const isActive = process.env.APP_IS_ACTIVE !== 'false';
 
     // If app is active, allow all requests
     if (isActive) {
